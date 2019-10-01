@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ImageView;
 
 import com.example.cliforcast.R;
 
@@ -15,7 +14,7 @@ public class Splash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash);
         new Handler().postDelayed(()->{
-            startActivity(new Intent(this,Weather.class));
+            startActivity(new Intent(this, CurrentWeather.class));
             finish();
         },1000);
     }
