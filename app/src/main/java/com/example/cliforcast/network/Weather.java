@@ -1,4 +1,4 @@
-package com.example.cliforcast.model;
+package com.example.cliforcast.network;
 
 import com.google.gson.annotations.SerializedName;
 

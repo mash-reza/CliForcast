@@ -1,9 +1,5 @@
 package com.example.cliforcast.network;
 
-import com.example.cliforcast.model.Weather;
-
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
