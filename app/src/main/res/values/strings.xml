@@ -1,3 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CliForcast</string>
+    <string name="location_permission_rejected_messege_alert_dialog">Location permission is needed if you want to check your current place weather. Please accept if you want to use this feature in app.</string>
+    <string name="i_agree">I agree</string>
+    <string name="i_disagree">I regret!</string>
+    <string name="wifit_permission_rejected_messege_alert_dialog">Wifi permission is needed to get the best result of your location for your current place weather data. Please accept if you want to use this feature more precised in app.</string>
 </resources>

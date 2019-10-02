@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">آب و هوا</string>
+    <string name="location_permission_rejected_messege_alert_dialog">اجازه دسترسی به موقعیت مکانی برای دریافت اطلاعات آب و هوایی مکان فعلی شما لازم است. لطفا برای استفاده از این قابلیت برنامه موافقت کنید.</string>
+    <string name="i_agree">موافقم</string>
+    <string name="i_disagree">مخالفم!</string>
+    <string name="wifit_permission_rejected_messege_alert_dialog">اجازه دسترسی به اطلاعات شبکه های وای فای برای دریافت دقیق ترین اطلاعات آب و هوایی مکان فعلی شما لازم است. لطفا برای استفاده بهتر، از این قابلیت برنامه موافقت کنید.</string>
+
+</resources>
