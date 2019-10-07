@@ -46,6 +46,8 @@ public class Weather {
 
 
     public class Weather1 {
+        @SerializedName("id")
+        private int id;
         @SerializedName("main")
         private String main;
         @SerializedName("description")
@@ -57,6 +59,10 @@ public class Weather {
 
         public String getDescription() {
             return description;
+        }
+
+        public int getId() {
+            return id;
         }
     }
 
