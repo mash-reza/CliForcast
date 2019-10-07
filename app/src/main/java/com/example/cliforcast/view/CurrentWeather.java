@@ -21,6 +21,7 @@ import com.example.cliforcast.Util.Constants;
 import com.example.cliforcast.database.RoomHelper;
 import com.example.cliforcast.network.Weather;
 import com.example.cliforcast.network.RetrofitClientInstance;
+import com.example.cliforcast.network.WeatherList;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -28,6 +29,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.Date;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,6 +38,8 @@ import retrofit2.Response;
 public class CurrentWeather extends AppCompatActivity {
     private static final String TAG = "CurrentWeather";
     private SharedPreferences preferences;
+
+    private boolean getLocation = false;
 
     //GoogleApiClient client;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -49,6 +53,11 @@ public class CurrentWeather extends AppCompatActivity {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermission();
 
+        getCityListForecast();
+
+    }
+
+    private void getCityForcast(){
         RetrofitClientInstance.getINSTANCE().getWeather("Las vegas,us").enqueue(new Callback<Weather>() {
             @Override
             public void onResponse(Call<Weather> call, Response<Weather> response) {
@@ -138,7 +147,20 @@ public class CurrentWeather extends AppCompatActivity {
                 //System.err.println(t);
             }
         });
+    }
+    private void getCityListForecast(){
+        RetrofitClientInstance.getINSTANCE().getWeatherList(112931,125188,128747).enqueue(new Callback<WeatherList>() {
+            @Override
+            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
+                Log.i(TAG, "onResponse: list of cities successful");
+                Log.i(TAG, "onResponse: "+response.body().getWeather()[1].getCoord().getLat());
+            }
 
+            @Override
+            public void onFailure(Call<WeatherList> call, Throwable t) {
+                Log.e(TAG, "onResponse: list of cities failed" + t.getMessage());
+            }
+        });
     }
 
     private void checkPermission() {
@@ -195,21 +217,24 @@ public class CurrentWeather extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LocationRequest request = new LocationRequest();
-        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        request.setInterval(5000);
-        request.setFastestInterval(1000);
-        fusedLocationProviderClient.requestLocationUpdates(request, new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                if (locationResult == null) {
-                    Toast.makeText(CurrentWeather.this, "null location result", Toast.LENGTH_SHORT).show();
-                    return;
+        if(getLocation){
+            LocationRequest request = new LocationRequest();
+            request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            request.setInterval(5000);
+            request.setFastestInterval(1000);
+            fusedLocationProviderClient.requestLocationUpdates(request, new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    if (locationResult == null) {
+                        Toast.makeText(CurrentWeather.this, "null location result", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Toast.makeText(CurrentWeather.this, locationResult.getLastLocation().getLatitude() + " - " +
+                            locationResult.getLastLocation().getLongitude(), Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(CurrentWeather.this, locationResult.getLastLocation().getLatitude() + " - " +
-                        locationResult.getLastLocation().getLongitude(), Toast.LENGTH_SHORT).show();
-            }
-        }, Looper.getMainLooper());
+            }, Looper.getMainLooper());
+        }
+
     }
 }
