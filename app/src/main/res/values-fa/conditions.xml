@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="thunderstorm">Thunderstorm</string>
+    <string name="x200">thunderstorm with light rain</string>
+    <string name="x201">thunderstorm with rain</string>
+    <string name="x202">thunderstorm with heavy rain</string>
+    <string name="x210">light thunderstorm</string>
+    <string name="x211">thunderstorm </string>
+    <string name="x212">heavy thunderstorm</string>
+    <string name="x221">ragged thunderstorm</string>
+    <string name="x230">thunderstorm with light drizzle</string>
+    <string name="x231">thunderstorm with drizzle</string>
+    <string name="x232">thunderstorm with heavy drizzle</string>
+
+    <string name="drizzle">Drizzle</string>
+    <string name="x300">light intensity drizzle </string>
+    <string name="x301">drizzle</string>
+    <string name="x302">heavy intensity drizzle</string>
+    <string name="x310">light intensity drizzle rain</string>
+    <string name="x311">drizzle rain</string>
+    <string name="x312">heavy intensity drizzle rain</string>
+    <string name="x313">shower rain and drizzle</string>
+    <string name="x314">heavy shower rain and drizzle</string>
+    <string name="x321">shower drizzle</string>
+
+    <string name="rain">Rain</string>
+    <string name="x500">light rain</string>
+    <string name="x501">moderate rain</string>
+    <string name="x502">heavy intensity rain</string>
+    <string name="x503">very heavy rain</string>
+    <string name="x504">extreme rain</string>
+    <string name="x511">freezing rain</string>
+    <string name="x520">light intensity shower rain</string>
+    <string name="x521">shower rain</string>
+    <string name="x522">heavy intensity shower rain</string>
+    <string name="x531">ragged shower rain</string>
+
+    <string name="snow">Snow</string>
+    <string name="x600">light snow</string>
+    <string name="x601">Snow</string>
+    <string name="x602">Heavy snow</string>
+    <string name="x611">Sleet</string>
+    <string name="x612">Light shower sleet</string>
+    <string name="x613">Shower sleet</string>
+    <string name="x615">Light rain and snow</string>
+    <string name="x616">Rain and snow</string>
+    <string name="x620">Light shower snow</string>
+    <string name="x621">Shower snow</string>
+    <string name="x622">Heavy shower snow</string>
+
+    <string name="atmosphere">Atmosphere</string>
+    <string name="atmosphere_701">Mist</string>
+    <string name="atmosphere_711">Smoke</string>
+    <string name="atmosphere_721">Haze</string>
+    <string name="atmosphere_731">Dust</string>
+    <string name="atmosphere_741">Fog</string>
+    <string name="atmosphere_751">Sand</string>
+    <string name="atmosphere_761">Dust</string>
+    <string name="atmosphere_762">Ash</string>
+    <string name="atmosphere_771">Squall</string>
+    <string name="atmosphere_781">Tornado</string>
+
+    <string name="clear">Clear</string>
+    <string name="x800">clear sky</string>
+
+    <string name="clouds">Clouds</string>
+    <string name="x801">few clouds: 11-25%</string>
+    <string name="x802">scattered clouds: 25-50%</string>
+    <string name="x803">broken clouds: 51-84%</string>
+    <string name="x804">overcast clouds: 85-100%</string>
+</resources>
