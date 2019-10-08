@@ -53,7 +53,7 @@ public class CurrentWeather extends AppCompatActivity {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermission();
 
-        getCityListForecast();
+        //getCityListForecast();
 
     }
 

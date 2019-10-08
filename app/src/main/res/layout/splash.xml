@@ -3,5 +3,4 @@
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/splashBackgroundImageView"
-    android:src="@drawable/splash_background"
     android:scaleType="fitXY"/>
