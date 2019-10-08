@@ -5,4 +5,9 @@
     <string name="i_agree">I agree</string>
     <string name="i_disagree">I regret!</string>
     <string name="wifit_permission_rejected_messege_alert_dialog">Wifi permission is needed to get the best result of your location for your current place weather data. Please accept if you want to use this feature more precised in app.</string>
+    <string name="day1">First Day Forecast</string>
+    <string name="day2">Second Day Forecast</string>
+    <string name="day3">Third Day Forecast</string>
+    <string name="day4">Forth Day Forecast</string>
+    <string name="day5">Fifth Day Forecast</string>
 </resources>

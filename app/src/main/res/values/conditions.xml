@@ -64,8 +64,8 @@
     <string name="x800">clear sky</string>
 
     <string name="clouds">Clouds</string>
-    <string name="x801">few clouds: 11-25%</string>
-    <string name="x802">scattered clouds: 25-50%</string>
-    <string name="x803">broken clouds: 51-84%</string>
-    <string name="x804">overcast clouds: 85-100%</string>
+    <string name="x801">few clouds</string>
+    <string name="x802">scattered clouds</string>
+    <string name="x803">broken clouds</string>
+    <string name="x804">overcast clouds</string>
 </resources>

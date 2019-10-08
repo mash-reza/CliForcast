@@ -3,15 +3,35 @@ package com.example.cliforcast.network;
 import com.google.gson.annotations.SerializedName;
 
 public class Weather {
-    private Coord coord;
+//    private Coord coord;
     private Weather1[] weather;
     private Main main;
     private Wind wind;
     private Clouds clouds;
 
-    public Coord getCoord() {
-        return coord;
+    @SerializedName("id")
+    private int id;
+    @SerializedName("name")
+    private String name;
+    @SerializedName("dt")
+    private long date;
+
+
+    public int getId() {
+        return id;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getDate() {
+        return date;
+    }
+
+//    public Coord getCoord() {
+//        return coord;
+//    }
 
     public Weather1[] getWeather() {
         return weather;
@@ -28,6 +48,7 @@ public class Weather {
     public Clouds getClouds() {
         return clouds;
     }
+
 
     public class Coord {
         @SerializedName("lon")
@@ -70,7 +91,7 @@ public class Weather {
         @SerializedName("temp")
         private double temp;
         @SerializedName("pressure")
-        private int pressure;
+        private float pressure;
         @SerializedName("humidity")
         private int humidity;
         @SerializedName("temp_min")
@@ -82,7 +103,7 @@ public class Weather {
             return temp;
         }
 
-        public int getPressure() {
+        public float getPressure() {
             return pressure;
         }
 

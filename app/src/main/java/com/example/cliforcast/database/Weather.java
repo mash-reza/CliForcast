@@ -32,6 +32,10 @@ public class Weather {
     private int clouds;
     @ColumnInfo(name = "time")
     private long time;
+    @ColumnInfo(name = "id")
+    private int id;
+    @ColumnInfo(name = "name")
+    private String name;
 
     public double getLon() {
         return lon;
@@ -79,8 +83,14 @@ public class Weather {
 
     public long getTime() { return time;}
 
+    public int getId() {
+        return id;
+    }
+    public String getName() {
+        return name;
+    }
 
-    public Weather(double lon, double lat, String main, String description, double temp, int pressure, int humidity, double temp_min, double temp_max, double speed, int clouds, long time) {
+    public Weather(double lon, double lat, String main, String description, double temp, int pressure, int humidity, double temp_min, double temp_max, double speed, int clouds, long time, int id,String name) {
         this.lon = lon;
         this.lat = lat;
         this.main = main;
@@ -93,5 +103,7 @@ public class Weather {
         this.speed = speed;
         this.clouds = clouds;
         this.time = time;
+        this.id = id;
+        this.name = name;
     }
 }

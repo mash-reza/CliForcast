@@ -4,6 +4,12 @@ import android.content.Context;
 
 import com.example.cliforcast.R;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class Utility {
     public static String idToStringMapper(Context context, int id) {
         switch (id) {
@@ -119,5 +125,51 @@ public class Utility {
                 return context.getString(R.string.x804);
         }
         return null;
+    }
+
+    public static int kelvinToCelsius(double kelvin) {
+        return (int) (kelvin - 273.15);
+    }
+
+    public static int idToConditionMapper(int id) {
+        if (id >= 200 && id <= 232) {
+            return R.drawable.thunderstorm;
+        } else if (id >= 300 && id <= 321) {
+            return R.drawable.shower_rain;
+        } else if (id >= 500 && id <= 504) {
+            return R.drawable.rain;
+        } else if (id == 511) {
+            return R.drawable.snow;
+        } else if (id >= 520 && id <= 531) {
+            return R.drawable.shower_rain;
+        } else if (id >= 600 && id <= 622) {
+            return R.drawable.snow;
+        } else if (id >= 701 & id <= 781) {
+            return R.drawable.mist;
+        } else if (id == 800) {
+            return R.drawable.clear_sky;
+        } else if (id == 801) {
+            return R.drawable.few_clouds;
+        } else if (id == 802) {
+            return R.drawable.scattered_clouds;
+        } else if (id == 803) {
+            return R.drawable.broken_clouds;
+        } else if (id == 804) {
+            return R.drawable.broken_clouds;
+        }
+        return -1;
+    }
+
+    public static String epochToDate(long epoch) {
+        Date date = new Date(epoch * 1000);
+//        SimpleDateFormat format = new SimpleDateFormat("EEEE,MMMM d,yyyy h:mm,a",Locale.ENGLISH);
+        SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d", Locale.ENGLISH);
+        format.setTimeZone(TimeZone.getDefault());
+        return format.format(date);
+
+    }
+
+    public static int mphToKmh(double mph) {
+        return (int) (mph * 1.609);
     }
 }

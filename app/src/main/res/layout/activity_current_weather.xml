@@ -31,6 +31,7 @@
 
 
     <ImageView
+        android:id="@+id/currentWeatherStatusImageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -44,41 +45,29 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/currentWeatherMainTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:text="Clear"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/large_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currentWeatherCityNameTextView" />
-
-    <TextView
         android:id="@+id/currentWeatherDescriptionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/medium_margin"
+        android:layout_marginTop="@dimen/small_margin"
         android:text="Clear and ash in air"
         android:textColor="@android:color/black"
         android:textSize="@dimen/medium_text"
-        app:layout_constraintBottom_toBottomOf="@+id/currentWeatherMainTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toEndOf="@+id/currentWeatherMainTextView"
-        app:layout_constraintTop_toTopOf="@+id/currentWeatherMainTextView" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/currentWeatherCityNameTextView" />
 
     <ScrollView
         android:id="@+id/currentWeatherDescriptionsScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="@dimen/large_margin"
+        android:layout_marginBottom="@dimen/small_margin"
         app:layout_constraintBottom_toTopOf="@+id/currentWeatherCardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currentWeatherMainTextView">
+        app:layout_constraintTop_toBottomOf="@+id/currentWeatherDescriptionTextView">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -197,17 +186,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <View
-        android:id="@+id/divider1"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="8dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintBottom_toTopOf="@+id/currentWeatherDescriptionsScrollView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currentWeatherMainTextView" />
-
     <TextView
         android:id="@+id/currentWeatherCityNameTextView"
         android:layout_width="wrap_content"
@@ -222,230 +200,205 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/currentWeatherCardView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/small_margin"
         android:layout_marginEnd="@dimen/small_margin"
         android:layout_marginBottom="@dimen/small_margin"
         app:cardBackgroundColor="#FFDBDBDB"
         app:cardCornerRadius="4dp"
-        app:cardElevation="2dp"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/currentWeatherDescriptionsScrollView">
 
-        <HorizontalScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/currentWeatherNowLinearLayout"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/small_margin"
+                android:layout_marginEnd="@dimen/small_margin"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/currentWeatherNowTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:text="Now"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
 
-                    <TextView
-                        android:id="@+id/currentWeatherNowTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Now"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
+                <ImageView
+                    android:id="@+id/currentWeatherNowIconImageView"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/thunderstorm" />
 
-                    <ImageView
-                        android:id="@+id/currentWeatherNowIconImageView"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@drawable/thunderstorm" />
-
-                    <TextView
-                        android:id="@+id/currentWeatherNowTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="22°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/listDivider"
-                    app:layout_constraintStart_toEndOf="@+id/currentWeatherNowIconImageView" />
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/currentWeatherNowTempTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/currentWeatherFirstDayMaxTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="26°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-
-                    <ImageView
-                        android:id="@+id/currentWeatherFirstDayIconImageView"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@drawable/thunderstorm" />
-
-                    <TextView
-                        android:id="@+id/currentWeatherFirstDayMinTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="22°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/listDivider" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/currentWeatherSecondDayMaxTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="28°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-
-                    <ImageView
-                        android:id="@+id/currentWeatherSecondDayIconImageView"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@drawable/thunderstorm" />
-
-                    <TextView
-                        android:id="@+id/currentWeatherSecondDayMinTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="22°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/listDivider" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/currentWeatherThirdDayMaxTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="28°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-
-                    <ImageView
-                        android:id="@+id/currentWeatherThirdDayIconImageView"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@drawable/thunderstorm" />
-
-                    <TextView
-                        android:id="@+id/currentWeatherThirdDayMinTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="22°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/listDivider" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/currentWeatherForthDayMaxTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="28°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-
-                    <ImageView
-                        android:id="@+id/currentWeatherForthDayIconImageView"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@drawable/thunderstorm" />
-
-                    <TextView
-                        android:id="@+id/currentWeatherForthDayMinTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="22°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/listDivider" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/currentWeatherFifthDayMaxTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="28°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-
-                    <ImageView
-                        android:id="@+id/currentWeatherFifthDayIconImageView"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@drawable/thunderstorm" />
-
-                    <TextView
-                        android:id="@+id/currentWeatherFifthDayMinTempTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="22°"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/medium_text" />
-                </LinearLayout>
+                    android:text="22°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
             </LinearLayout>
-        </HorizontalScrollView>
 
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:id="@+id/currentWeatherFirstLinearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentWeatherFirstDayMaxTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="26°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+
+                <ImageView
+                    android:id="@+id/currentWeatherFirstDayIconImageView"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/thunderstorm" />
+
+                <TextView
+                    android:id="@+id/currentWeatherFirstDayMinTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="22°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:id="@+id/currentWeatherSecondLinearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentWeatherSecondDayMaxTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="28°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+
+                <ImageView
+                    android:id="@+id/currentWeatherSecondDayIconImageView"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/thunderstorm" />
+
+                <TextView
+                    android:id="@+id/currentWeatherSecondDayMinTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="22°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:id="@+id/currentWeatherThirdLinearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentWeatherThirdDayMaxTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="28°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+
+                <ImageView
+                    android:id="@+id/currentWeatherThirdDayIconImageView"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/thunderstorm" />
+
+                <TextView
+                    android:id="@+id/currentWeatherThirdDayMinTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="22°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:id="@+id/currentWeatherForthLinearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentWeatherForthDayMaxTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="28°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+
+                <ImageView
+                    android:id="@+id/currentWeatherForthDayIconImageView"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/thunderstorm" />
+
+                <TextView
+                    android:id="@+id/currentWeatherForthDayMinTempTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="22°"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/medium_text" />
+            </LinearLayout>
+        </LinearLayout>
 
     </androidx.cardview.widget.CardView>
 
