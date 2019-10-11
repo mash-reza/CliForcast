@@ -7,15 +7,19 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.SearchManager;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SearchEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +36,13 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Date;
 
 import retrofit2.Call;
@@ -93,6 +103,7 @@ public class CurrentWeather extends AppCompatActivity {
 
         initUi();
         getCityForcast();
+        getSerachIntent();
     }
 
     private void initUi() {
@@ -477,5 +488,26 @@ public class CurrentWeather extends AppCompatActivity {
             default:
                 return true;
         }
+    }
+
+    private void getSerachIntent(){
+        Intent intent = getIntent();
+        if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            InputStream in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities);
+            Reader reader = new BufferedReader(new InputStreamReader(in));
+            City[] cities = new Gson().fromJson(reader, City[].class);
+            for (City city : cities) {
+                if(city.name.toLowerCase().contains(query))
+                    Log.d(TAG, "onSearchRequested: " + city.id + " " + city.name + " " + city.country);
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        getSerachIntent();
     }
 }
