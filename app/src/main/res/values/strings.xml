@@ -10,4 +10,6 @@
     <string name="day3">Third Day Forecast</string>
     <string name="day4">Forth Day Forecast</string>
     <string name="day5">Fifth Day Forecast</string>
+    <string name="search_hint">Search City or State...</string>
+    <string name="search">Search</string>
 </resources>

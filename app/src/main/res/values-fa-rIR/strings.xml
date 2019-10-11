@@ -10,4 +10,7 @@
     <string name="day3">پیش بینی روز سوم</string>
     <string name="day4">پیش بینی روز چهارم</string>
     <string name="day5">پیش بینی روز پنجم</string>
+    <string name="search_hint">جستجوی شهر یا استان...</string>
+    <string name="search">جستجو</string>
+
 </resources>

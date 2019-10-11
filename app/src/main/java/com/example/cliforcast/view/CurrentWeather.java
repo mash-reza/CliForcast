@@ -13,6 +13,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +49,7 @@ public class CurrentWeather extends AppCompatActivity {
     private Weather currentWeather;
     private WeatherList fiveDayWeather;
 
-    String place = "el paso";
+    String place = "Sari";
 
     //GoogleApiClient client;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -454,5 +457,25 @@ public class CurrentWeather extends AppCompatActivity {
                 currentWeatherHumidityTextView.setText(fiveDayWeather.getWeather()[32].getMain().getHumidity() + "%");
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.currentWeatherSearchMenuItem:
+                onSearchRequested();
+                return true;
+            case R.id.currentWeatherLocationMenuItem:
+                return true;
+            default:
+                return true;
+        }
     }
 }
