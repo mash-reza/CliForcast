@@ -3,7 +3,10 @@ package com.example.cliforcast.view;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -14,12 +17,11 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SearchEvent;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +29,6 @@ import android.widget.Toast;
 import com.example.cliforcast.R;
 import com.example.cliforcast.Util.Constants;
 import com.example.cliforcast.Util.Utility;
-import com.example.cliforcast.database.RoomHelper;
 import com.example.cliforcast.network.Weather;
 import com.example.cliforcast.network.RetrofitClientInstance;
 import com.example.cliforcast.network.WeatherList;
@@ -39,11 +40,12 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -59,10 +61,15 @@ public class CurrentWeather extends AppCompatActivity {
     private Weather currentWeather;
     private WeatherList fiveDayWeather;
 
-    String place = "Sari";
+    private String place = "Sari";
 
     //GoogleApiClient client;
-    FusedLocationProviderClient fusedLocationProviderClient;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
+    private List<City> cities;
+
+    ConstraintLayout currentWeatherLayout;
+    RecyclerView currentWeatherSearchRecyclerView;
 
     TextView currentWeatherDateTextView;
     TextView currentWeatherTemperatureTextView;
@@ -97,6 +104,8 @@ public class CurrentWeather extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_weather);
 
+        cities = new ArrayList<>();
+
         preferences = getSharedPreferences(Constants.LOCATION_PREFERENCES, MODE_PRIVATE);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermission();
@@ -107,6 +116,17 @@ public class CurrentWeather extends AppCompatActivity {
     }
 
     private void initUi() {
+        currentWeatherLayout = findViewById(R.id.currentWeatherLayout);
+        currentWeatherSearchRecyclerView = findViewById(R.id.currentWeatherSearchRecyclerView);
+        currentWeatherSearchRecyclerView.setLayoutManager(
+                new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false)
+        );
+        SearchAdapter adapter = new SearchAdapter(getApplicationContext(), cities,() -> {
+            currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+            currentWeatherLayout.setVisibility(View.VISIBLE);
+        });
+        currentWeatherSearchRecyclerView.setAdapter(adapter);
+
         currentWeatherDateTextView = findViewById(R.id.currentWeatherDateTextView);
         currentWeatherTemperatureTextView = findViewById(R.id.currentWeatherTemperatureTextView);
         currentWeatherCityNameTextView = findViewById(R.id.currentWeatherCityNameTextView);
@@ -490,17 +510,23 @@ public class CurrentWeather extends AppCompatActivity {
         }
     }
 
-    private void getSerachIntent(){
+    private void getSerachIntent() {
         Intent intent = getIntent();
-        if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             InputStream in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities);
             Reader reader = new BufferedReader(new InputStreamReader(in));
-            City[] cities = new Gson().fromJson(reader, City[].class);
-            for (City city : cities) {
-                if(city.name.toLowerCase().contains(query))
-                    Log.d(TAG, "onSearchRequested: " + city.id + " " + city.name + " " + city.country);
+            City[] resultCities = new Gson().fromJson(reader, City[].class);
+            for (int i = 0;i<resultCities.length;i++) {
+                if (resultCities[i].name.toLowerCase().contains(query)) {
+                    Log.d(TAG, "onSearchRequested: " + resultCities[i].id + " " + resultCities[i].name + " " + resultCities[i].country);
+                    this.cities.add(resultCities[i]);
+                }
             }
+            currentWeatherSearchRecyclerView.setVisibility(View.VISIBLE);
+            currentWeatherLayout.setVisibility(View.GONE);
+            if (currentWeatherSearchRecyclerView.getAdapter() != null)
+                currentWeatherSearchRecyclerView.getAdapter().notifyDataSetChanged();
         }
     }
 
