@@ -34,7 +34,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchViewHolder> {
     public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
         holder.currentWeatherSearchItemTextView.setText(cities.get(position).name);
         holder.currentWeatherSearchItemTextView.setOnClickListener(v -> {
-            onSearchListSelected.onSelect();
+            onSearchListSelected.onSelect(cities.get(position).id);
         });
     }
 

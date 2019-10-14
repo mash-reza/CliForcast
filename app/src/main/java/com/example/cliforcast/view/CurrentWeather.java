@@ -7,6 +7,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.ColumnInfo;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -44,6 +45,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -61,7 +63,7 @@ public class CurrentWeather extends AppCompatActivity {
     private Weather currentWeather;
     private WeatherList fiveDayWeather;
 
-    private String place = "Sari";
+    private int cityId;
 
     //GoogleApiClient client;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -111,7 +113,7 @@ public class CurrentWeather extends AppCompatActivity {
         checkPermission();
 
         initUi();
-        getCityForcast();
+        //getCityForcast();
         getSerachIntent();
     }
 
@@ -121,9 +123,11 @@ public class CurrentWeather extends AppCompatActivity {
         currentWeatherSearchRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false)
         );
-        SearchAdapter adapter = new SearchAdapter(getApplicationContext(), cities,() -> {
+        SearchAdapter adapter = new SearchAdapter(getApplicationContext(), cities,(id) -> {
             currentWeatherSearchRecyclerView.setVisibility(View.GONE);
             currentWeatherLayout.setVisibility(View.VISIBLE);
+            cityId = id;
+            getCityForcast(id);
         });
         currentWeatherSearchRecyclerView.setAdapter(adapter);
 
@@ -154,8 +158,8 @@ public class CurrentWeather extends AppCompatActivity {
 
     }
 
-    private void getCityForcast() {
-        RetrofitClientInstance.getINSTANCE().getWeather(place).enqueue(new Callback<Weather>() {
+    private void getCityForcast(int id) {
+        RetrofitClientInstance.getINSTANCE().getWeather(cityId).enqueue(new Callback<Weather>() {
             @Override
             public void onResponse(Call<Weather> call, Response<Weather> response) {
                 currentWeather = response.body();
@@ -267,7 +271,7 @@ public class CurrentWeather extends AppCompatActivity {
                 //System.err.println(t);
             }
         });
-        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(place).enqueue(new Callback<WeatherList>() {
+        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(cityId).enqueue(new Callback<WeatherList>() {
             @Override
             public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
                 fiveDayWeather = response.body();
@@ -516,11 +520,11 @@ public class CurrentWeather extends AppCompatActivity {
             String query = intent.getStringExtra(SearchManager.QUERY);
             InputStream in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities);
             Reader reader = new BufferedReader(new InputStreamReader(in));
-            City[] resultCities = new Gson().fromJson(reader, City[].class);
-            for (int i = 0;i<resultCities.length;i++) {
-                if (resultCities[i].name.toLowerCase().contains(query)) {
-                    Log.d(TAG, "onSearchRequested: " + resultCities[i].id + " " + resultCities[i].name + " " + resultCities[i].country);
-                    this.cities.add(resultCities[i]);
+            City[] cities = new Gson().fromJson(reader, City[].class);
+            this.cities.clear();
+            for (City city:cities){
+                if(city.name.toLowerCase().contains(query)){
+                    this.cities.add(city);
                 }
             }
             currentWeatherSearchRecyclerView.setVisibility(View.VISIBLE);
