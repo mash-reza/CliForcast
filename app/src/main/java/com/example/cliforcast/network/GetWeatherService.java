@@ -13,6 +13,12 @@ public interface GetWeatherService {
     @GET("/data/2.5/forecast?APPID=276e7cbc702e178eb512aec1a2610679")
     Call<WeatherList> getFiveDayWeather(@Query("id") int cityId);
 
+    @GET("/data/2.5/weather?APPID=276e7cbc702e178eb512aec1a2610679")
+    Call<Weather> getWeather(@Query("lat") double lat,@Query("lon") double lon);
+
+    @GET("/data/2.5/forecast?APPID=276e7cbc702e178eb512aec1a2610679")
+    Call<WeatherList> getFiveDayWeather(@Query("lat") double lat,@Query("lon") double lon);
+
 
     @GET("/data/2.5/group?APPID=276e7cbc702e178eb512aec1a2610679")
     Call<WeatherList> getWeatherList(@Query("id") int... cities);

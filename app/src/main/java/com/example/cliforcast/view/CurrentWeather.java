@@ -2,6 +2,7 @@ package com.example.cliforcast.view;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -12,9 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
@@ -75,6 +78,7 @@ public class CurrentWeather extends AppCompatActivity {
 
     //GoogleApiClient client;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    LocationManager locationManager;
 
     InputStream in;
     Reader reader;
@@ -122,6 +126,8 @@ public class CurrentWeather extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_weather);
+
+        locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
         in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities);
         reader = new BufferedReader(new InputStreamReader(in));
@@ -368,7 +374,7 @@ public class CurrentWeather extends AppCompatActivity {
             @Override
             public void onFailure(Call<Weather> call, Throwable t) {
                 Log.e(TAG, "onFailure: " + t.getMessage());
-                if(t instanceof IOException){
+                if (t instanceof IOException) {
                     currentWeatherErrorImageView.setImageResource(R.drawable.no_internet);
                     currentWeatherErrorTextView.setText(R.string.no_internet_problem);
                     Toast.makeText(CurrentWeather.this, R.string.turn_on_internet, Toast.LENGTH_LONG).show();
@@ -377,6 +383,15 @@ public class CurrentWeather extends AppCompatActivity {
                     currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
                     currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
                 }
+//                if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+//                    currentWeatherErrorImageView.setImageResource(R.drawable.no_location);
+//                    currentWeatherErrorTextView.setText(R.string.no_location_problem);
+//                    Toast.makeText(CurrentWeather.this, R.string.turn_on_location, Toast.LENGTH_LONG).show();
+//                    currentWeatherLayout.setVisibility(View.GONE);
+//                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+//                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+//                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+//                }
             }
         });
         RetrofitClientInstance.getINSTANCE().getFiveDayWeather(id).enqueue(new Callback<WeatherList>() {
@@ -405,19 +420,182 @@ public class CurrentWeather extends AppCompatActivity {
         });
     }
 
-    private void getCityListForecast() {
-        RetrofitClientInstance.getINSTANCE().getWeatherList(112931, 125188, 128747).enqueue(new Callback<WeatherList>() {
+    private void getCityForcast(double lat, double lon) {
+        currentWeatherErrorLinearLayout.setVisibility(View.GONE);
+        currentWeatherLayout.setVisibility(View.GONE);
+        currentWeatherLoadingLinearLayout.setVisibility(View.VISIBLE);
+        RetrofitClientInstance.getINSTANCE().getWeather(lat, lon).enqueue(new Callback<Weather>() {
+            @Override
+            public void onResponse(Call<Weather> call, Response<Weather> response) {
+                currentWeather = response.body();
+                AsyncTask.execute(() -> {
+                    com.example.cliforcast.database.Weather city = null;
+//                            RoomHelper.getInstance(getApplicationContext()).getDao().getCity(
+//                                    response.body().getCoord().getLat(),
+//                                    response.body().getCoord().getLon());
+                    if (city != null) {
+                        if (new Date().getTime() - (city.getTime()) < 1000) {
+                            runOnUiThread(() -> {
+                                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(city.getTemp()) + "°");
+                                currentWeatherCityNameTextView.setText(city.getName());
+                                currentWeatherDescriptionTextView.setText(city.getMain());
+                            });
+                        } else {
+                            runOnUiThread(() -> {
+                                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
+                                currentWeatherCityNameTextView.setText(response.body().getName());
+                                currentWeatherDescriptionTextView.setText(response.body().getWeather()[0].getMain());
+                                currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
+                                        response.body().getWeather()[0].getId()
+                                ));
+                                currentWeatherDateTextView.setText(Utility.epochToDate(response.body().getDate()));
+                                currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
+                                        getApplicationContext(), response.body().getWeather()[0].getId()
+                                ));
+                                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_max()) + "°");
+                                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_min()) + "°");
+                                currentWeatherWindTextView.setText(Utility.mphToKmh(response.body().getWind().getSpeed()) + " Kmh");
+                                currentWeatherCloudsTextView.setText(response.body().getClouds().getClouds() + "%");
+                                currentWeatherHumidityTextView.setText(response.body().getMain().getHumidity() + "%");
+                                currentWeatherNowIconImageView.setImageResource(
+                                        Utility.idToConditionMapper(
+                                                response.body().getWeather()[0].getId()
+                                        )
+                                );
+                                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
+                            });
+                            {
+//                                RoomHelper.getInstance(getApplicationContext()).getDao().insertCity(new com.example.cliforcast.database.Weather(
+//                                        response.body().getCoord().getLon(),
+//                                        response.body().getCoord().getLat(),
+//                                        response.body().getWeather()[0].getMain(),
+//                                        response.body().getWeather()[0].getDescription(),
+//                                        response.body().getMain().getTemp(),
+//                                        response.body().getMain().getPressure(),
+//                                        response.body().getMain().getHumidity(),
+//                                        response.body().getMain().getTemp_min(),
+//                                        response.body().getMain().getTemp_max(),
+//                                        response.body().getWind().getSpeed(),
+//                                        response.body().getClouds().getClouds(),
+//                                        new Date().getTime(),
+//                                        response.body().getId(),
+//                                        response.body().getName()
+//                                ));
+                            }
+                        }
+                    } else {
+                        runOnUiThread(() -> {
+                            currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
+                            currentWeatherCityNameTextView.setText(response.body().getName());
+                            currentWeatherDescriptionTextView.setText(response.body().getWeather()[0].getMain());
+                            currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
+                                    response.body().getWeather()[0].getId()
+                            ));
+                            currentWeatherDateTextView.setText(Utility.epochToDate(response.body().getDate()));
+                            currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
+                                    getApplicationContext(), response.body().getWeather()[0].getId()
+                            ));
+                            currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_max()) + "°");
+                            currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_min()) + "°");
+                            currentWeatherWindTextView.setText(Utility.mphToKmh(response.body().getWind().getSpeed()) + " Kmh");
+                            currentWeatherCloudsTextView.setText(response.body().getClouds().getClouds() + "%");
+                            currentWeatherHumidityTextView.setText(response.body().getMain().getHumidity() + "%");
+                            currentWeatherNowIconImageView.setImageResource(
+                                    Utility.idToConditionMapper(
+                                            response.body().getWeather()[0].getId()
+                                    )
+                            );
+                            currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
+                        });
+                        {
+//                            RoomHelper.getInstance(getApplicationContext()).getDao().insertCity(new com.example.cliforcast.database.Weather(
+//                                    response.body().getCoord().getLon(),
+//                                    response.body().getCoord().getLat(),
+//                                    response.body().getWeather()[0].getMain(),
+//                                    response.body().getWeather()[0].getDescription(),
+//                                    response.body().getMain().getTemp(),
+//                                    response.body().getMain().getPressure(),
+//                                    response.body().getMain().getHumidity(),
+//                                    response.body().getMain().getTemp_min(),
+//                                    response.body().getMain().getTemp_max(),
+//                                    response.body().getWind().getSpeed(),
+//                                    response.body().getClouds().getClouds(),
+//                                    new Date().getTime(),
+//                                    response.body().getId(),
+//                                    response.body().getName()
+//                            ));
+                        }
+                    }
+                });
+                isCityResponseSuccessful = true;
+                currentWeatherErrorLinearLayout.setVisibility(View.GONE);
+                currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                currentWeatherLayout.setVisibility(View.VISIBLE);
+
+            }
+
+            @Override
+            public void onFailure(Call<Weather> call, Throwable t) {
+                Log.e(TAG, "onFailure: " + t.getMessage());
+                if (t instanceof IOException) {
+                    currentWeatherErrorImageView.setImageResource(R.drawable.no_internet);
+                    currentWeatherErrorTextView.setText(R.string.no_internet_problem);
+                    Toast.makeText(CurrentWeather.this, R.string.turn_on_internet, Toast.LENGTH_LONG).show();
+                    currentWeatherLayout.setVisibility(View.GONE);
+                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+                }
+//                if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+//                    currentWeatherErrorImageView.setImageResource(R.drawable.no_location);
+//                    currentWeatherErrorTextView.setText(R.string.no_location_problem);
+//                    Toast.makeText(CurrentWeather.this, R.string.turn_on_location, Toast.LENGTH_LONG).show();
+//                    currentWeatherLayout.setVisibility(View.GONE);
+//                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+//                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+//                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+//                }
+            }
+        });
+        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(lat, lon).enqueue(new Callback<WeatherList>() {
             @Override
             public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
-
+                fiveDayWeather = response.body();
+                isFiveDayResponseSuccessful = true;
+                currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[8].getMain().getTemp_max()) + "°");
+                currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[8].getMain().getTemp_min()) + "°");
+                currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[8].getWeather()[0].getId()));
+                currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[16].getMain().getTemp_max()) + "°");
+                currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[16].getMain().getTemp_min()) + "°");
+                currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[16].getWeather()[0].getId()));
+                currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[24].getMain().getTemp_max()) + "°");
+                currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[24].getMain().getTemp_min()) + "°");
+                currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[24].getWeather()[0].getId()));
+                currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[32].getMain().getTemp_max()) + "°");
+                currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[32].getMain().getTemp_min()) + "°");
+                currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[32].getWeather()[0].getId()));
             }
 
             @Override
             public void onFailure(Call<WeatherList> call, Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
+                Log.i(TAG, "onFailure: " + t.getLocalizedMessage());
             }
         });
     }
+
+//    private void getCityListForecast() {
+//        RetrofitClientInstance.getINSTANCE().getWeatherList(112931, 125188, 128747).enqueue(new Callback<WeatherList>() {
+//            @Override
+//            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<WeatherList> call, Throwable t) {
+//                Log.e(TAG, "onFailure: ", t);
+//            }
+//        });
+//    }
 
     private void checkPermission() {
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -469,30 +647,9 @@ public class CurrentWeather extends AppCompatActivity {
         }
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     protected void onResume() {
         super.onResume();
-
-
-        if (getLocation) {
-            LocationRequest request = new LocationRequest();
-            request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            request.setInterval(5000);
-            request.setFastestInterval(1000);
-            fusedLocationProviderClient.requestLocationUpdates(request, new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    super.onLocationResult(locationResult);
-                    if (locationResult == null) {
-                        Toast.makeText(CurrentWeather.this, "null location result", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Toast.makeText(CurrentWeather.this, locationResult.getLastLocation().getLatitude() + " - " +
-                            locationResult.getLastLocation().getLongitude(), Toast.LENGTH_SHORT).show();
-                }
-            }, Looper.getMainLooper());
-        }
         fiveDayEventControl();
     }
 
@@ -612,12 +769,44 @@ public class CurrentWeather extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem locationMenuItem = menu.findItem(R.id.currentWeatherLocationMenuItem);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+            locationMenuItem.setIcon(R.drawable.location_on_icon);
+        else
+            locationMenuItem.setIcon(R.drawable.location_off_icon);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    @SuppressLint("MissingPermission")
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.currentWeatherSearchMenuItem:
                 onSearchRequested();
                 return true;
             case R.id.currentWeatherLocationMenuItem:
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    LocationRequest request = new LocationRequest();
+                    request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    request.setInterval(1800000);
+                    //request.setFastestInterval(5000);
+                    fusedLocationProviderClient.requestLocationUpdates(request, new LocationCallback() {
+                        @Override
+                        public void onLocationResult(LocationResult locationResult) {
+                            super.onLocationResult(locationResult);
+                            if (locationResult == null) {
+                                Toast.makeText(CurrentWeather.this, "null location result", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            getCityForcast(
+                                    locationResult.getLastLocation().getLatitude(),
+                                    locationResult.getLastLocation().getLongitude());
+                        }
+                    }, Looper.getMainLooper());
+
+                } else
+                    Toast.makeText(this, R.string.turn_on_location, Toast.LENGTH_LONG).show();
                 return true;
             default:
                 return true;
