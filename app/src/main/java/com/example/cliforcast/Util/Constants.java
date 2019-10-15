@@ -9,5 +9,6 @@ public class Constants {
     public static final String PREFERENCES = "Pref";
     public static final String LOCATION_PREFERENCES = "locationPref";
     public static final String WIFI_PREFERENCES = "wifiPref";
-    public static final String FIRST_LAUNCH_PREFRENCES = " firstLaunchPref";
+    public static final String FIRST_LAUNCH_PREFERENCES = " firstLaunchPref";
+    public static final String CITYID = "cityId";
 }

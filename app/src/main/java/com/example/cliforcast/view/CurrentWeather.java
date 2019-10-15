@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +61,7 @@ public class CurrentWeather extends AppCompatActivity {
     private static final String TAG = "CurrentWeather";
     private SharedPreferences preferences;
 
+
     private boolean getLocation = false;
     private Boolean isCityResponseSuccessful = false;
     private Boolean isFiveDayResponseSuccessful = false;
@@ -78,6 +80,7 @@ public class CurrentWeather extends AppCompatActivity {
 
     ConstraintLayout currentWeatherLayout;
     RecyclerView currentWeatherSearchRecyclerView;
+    LinearLayout currentWeatherLoadingLinearLayout;
 
     TextView currentWeatherDateTextView;
     TextView currentWeatherTemperatureTextView;
@@ -119,36 +122,23 @@ public class CurrentWeather extends AppCompatActivity {
         cities = new ArrayList<>();
         citiesArray = new Gson().fromJson(reader, City[].class);
 
-        preferences = getSharedPreferences(Constants.LOCATION_PREFERENCES, MODE_PRIVATE);
+        preferences = getSharedPreferences(Constants.PREFERENCES, MODE_PRIVATE);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermission();
 
-        fillCitiesList("");
+        fillCitiesList();
         initUi();
         //getCityForcast();
-        showChooseCityDialog();
+        if (preferences.getBoolean(Constants.FIRST_LAUNCH_PREFERENCES, true)) {
+            currentWeatherLayout.setVisibility(View.GONE);
+            showChooseCityDialog();
+        } else getCityForcast(preferences.getInt(Constants.CITYID, 0));
         getSerachIntent();
     }
 
-    private void fillCitiesList(String contained) {
-        if (contained.equals("")) {
-            this.cities.clear();
-            Collections.addAll(cities, citiesArray);
-        } else {
-            City tempCity = null;
-            for (int i = 0; i < cities.size(); i++) {
-                if (!cities.get(i).name.toLowerCase().contains(contained)) {
-                    tempCity = cities.get(i);
-                    cities.remove(tempCity);
-                } else {
-                    tempCity = cities.get(i);
-                    cities.add(tempCity);
-                }
-                if (dialogRecyclerView != null && dialogRecyclerView.getAdapter() != null)
-                    dialogRecyclerView.getAdapter().notifyDataSetChanged();
-                tempCity = null;
-            }
-        }
+    private void fillCitiesList() {
+        this.cities.clear();
+        Collections.addAll(cities, citiesArray);
 
     }
 
@@ -161,9 +151,11 @@ public class CurrentWeather extends AppCompatActivity {
                 new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false)
         );
         dialogRecyclerView.setAdapter(new DialogAdapter(getApplicationContext(), cities, id -> {
-            cityId = id;
-            getCityForcast(cityId);
+            preferences.edit().putInt(Constants.CITYID, id).apply();
+            getCityForcast(id);
             alertDialog.cancel();
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(Constants.FIRST_LAUNCH_PREFERENCES, false).apply();
         }));
         dialogEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -174,12 +166,28 @@ public class CurrentWeather extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.equals("")) {
-                    fillCitiesList("");
-                    if (dialogRecyclerView.getAdapter() != null) {
-                        dialogRecyclerView.getAdapter().notifyDataSetChanged();
-                    }
+                    dialogRecyclerView.setAdapter(null);
+                    dialogRecyclerView.setAdapter(new DialogAdapter(getApplicationContext(), cities, id -> {
+                        preferences.edit().putInt(Constants.CITYID, id).apply();
+                        getCityForcast(id);
+                        alertDialog.cancel();
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean(Constants.FIRST_LAUNCH_PREFERENCES, false).apply();
+                    }));
                 } else {
-                    fillCitiesList(s.toString());
+                    List<City> cities = new ArrayList<>();
+                    for (int i = 0; i < CurrentWeather.this.cities.size(); i++) {
+                        if (CurrentWeather.this.cities.get(i).name.toLowerCase().matches(s + ".*"))
+                            cities.add(CurrentWeather.this.cities.get(i));
+                    }
+                    dialogRecyclerView.setAdapter(null);
+                    dialogRecyclerView.setAdapter(new DialogAdapter(getApplicationContext(), cities, id -> {
+                        preferences.edit().putInt(Constants.CITYID, id).apply();
+                        getCityForcast(id);
+                        alertDialog.cancel();
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean(Constants.FIRST_LAUNCH_PREFERENCES, false).apply();
+                    }));
                 }
             }
 
@@ -195,13 +203,14 @@ public class CurrentWeather extends AppCompatActivity {
     private void initUi() {
         currentWeatherLayout = findViewById(R.id.currentWeatherLayout);
         currentWeatherSearchRecyclerView = findViewById(R.id.currentWeatherSearchRecyclerView);
+        currentWeatherLoadingLinearLayout = findViewById(R.id.currentWeatherLoadingLinearLayout);
         currentWeatherSearchRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false)
         );
         SearchAdapter adapter = new SearchAdapter(getApplicationContext(), cities, (id) -> {
             currentWeatherSearchRecyclerView.setVisibility(View.GONE);
             currentWeatherLayout.setVisibility(View.VISIBLE);
-            cityId = id;
+            preferences.edit().putInt(Constants.CITYID, id).apply();
             getCityForcast(id);
         });
         currentWeatherSearchRecyclerView.setAdapter(adapter);
@@ -234,7 +243,9 @@ public class CurrentWeather extends AppCompatActivity {
     }
 
     private void getCityForcast(int id) {
-        RetrofitClientInstance.getINSTANCE().getWeather(cityId).enqueue(new Callback<Weather>() {
+        currentWeatherLayout.setVisibility(View.GONE);
+        currentWeatherLoadingLinearLayout.setVisibility(View.VISIBLE);
+        RetrofitClientInstance.getINSTANCE().getWeather(id).enqueue(new Callback<Weather>() {
             @Override
             public void onResponse(Call<Weather> call, Response<Weather> response) {
                 currentWeather = response.body();
@@ -338,6 +349,9 @@ public class CurrentWeather extends AppCompatActivity {
                     }
                 });
                 isCityResponseSuccessful = true;
+                currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                currentWeatherLayout.setVisibility(View.VISIBLE);
+
             }
 
             @Override
@@ -346,7 +360,7 @@ public class CurrentWeather extends AppCompatActivity {
                 //System.err.println(t);
             }
         });
-        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(cityId).enqueue(new Callback<WeatherList>() {
+        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(id).enqueue(new Callback<WeatherList>() {
             @Override
             public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
                 fiveDayWeather = response.body();
@@ -606,6 +620,7 @@ public class CurrentWeather extends AppCompatActivity {
             }
             currentWeatherSearchRecyclerView.setVisibility(View.VISIBLE);
             currentWeatherLayout.setVisibility(View.GONE);
+            currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
             if (currentWeatherSearchRecyclerView.getAdapter() != null)
                 currentWeatherSearchRecyclerView.getAdapter().notifyDataSetChanged();
         }
@@ -616,5 +631,23 @@ public class CurrentWeather extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         getSerachIntent();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (preferences.getBoolean(Constants.FIRST_LAUNCH_PREFERENCES, true)) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(Constants.FIRST_LAUNCH_PREFERENCES, false).apply();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (preferences.getBoolean(Constants.FIRST_LAUNCH_PREFERENCES, true)) {
+            Toast.makeText(this, "please choose a city before quiting", Toast.LENGTH_SHORT).show();
+        } else {
+            finish();
+        }
     }
 }

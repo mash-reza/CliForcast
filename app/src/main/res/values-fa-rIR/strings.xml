@@ -14,6 +14,6 @@
     <string name="search">جستجو</string>
     <string name="choose_a_city">یک شهر را انتخاب کنید!</string>
     <string name="select">انتخاب</string>
-
+    <string name="loading_requset">درحال دریافت اطلاعات آب وهوا، لطفا منتظر بمانید!</string>
 
 </resources>

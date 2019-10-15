@@ -14,4 +14,5 @@
     <string name="search">Search</string>
     <string name="choose_a_city">Choose a city!</string>
     <string name="select">Select</string>
+    <string name="loading_requset">Getting Weather Information. Please Wait!</string>
 </resources>
