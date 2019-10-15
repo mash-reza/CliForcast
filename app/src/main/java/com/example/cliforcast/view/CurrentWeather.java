@@ -1,6 +1,7 @@
 package com.example.cliforcast.view;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -24,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SearchEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -45,6 +47,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -81,6 +84,9 @@ public class CurrentWeather extends AppCompatActivity {
     ConstraintLayout currentWeatherLayout;
     RecyclerView currentWeatherSearchRecyclerView;
     LinearLayout currentWeatherLoadingLinearLayout;
+    ImageView currentWeatherErrorImageView;
+    TextView currentWeatherErrorTextView;
+    LinearLayout currentWeatherErrorLinearLayout;
 
     TextView currentWeatherDateTextView;
     TextView currentWeatherTemperatureTextView;
@@ -133,7 +139,7 @@ public class CurrentWeather extends AppCompatActivity {
             currentWeatherLayout.setVisibility(View.GONE);
             showChooseCityDialog();
         } else getCityForcast(preferences.getInt(Constants.CITYID, 0));
-        getSerachIntent();
+        getSearchIntent();
     }
 
     private void fillCitiesList() {
@@ -204,6 +210,9 @@ public class CurrentWeather extends AppCompatActivity {
         currentWeatherLayout = findViewById(R.id.currentWeatherLayout);
         currentWeatherSearchRecyclerView = findViewById(R.id.currentWeatherSearchRecyclerView);
         currentWeatherLoadingLinearLayout = findViewById(R.id.currentWeatherLoadingLinearLayout);
+        currentWeatherErrorImageView = findViewById(R.id.currentWeatherErrorImageView);
+        currentWeatherErrorTextView = findViewById(R.id.currentWeatherErrorTextView);
+        currentWeatherErrorLinearLayout = findViewById(R.id.currentWeatherErrorLinearLayout);
         currentWeatherSearchRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false)
         );
@@ -243,6 +252,7 @@ public class CurrentWeather extends AppCompatActivity {
     }
 
     private void getCityForcast(int id) {
+        currentWeatherErrorLinearLayout.setVisibility(View.GONE);
         currentWeatherLayout.setVisibility(View.GONE);
         currentWeatherLoadingLinearLayout.setVisibility(View.VISIBLE);
         RetrofitClientInstance.getINSTANCE().getWeather(id).enqueue(new Callback<Weather>() {
@@ -349,6 +359,7 @@ public class CurrentWeather extends AppCompatActivity {
                     }
                 });
                 isCityResponseSuccessful = true;
+                currentWeatherErrorLinearLayout.setVisibility(View.GONE);
                 currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
                 currentWeatherLayout.setVisibility(View.VISIBLE);
 
@@ -357,7 +368,15 @@ public class CurrentWeather extends AppCompatActivity {
             @Override
             public void onFailure(Call<Weather> call, Throwable t) {
                 Log.e(TAG, "onFailure: " + t.getMessage());
-                //System.err.println(t);
+                if(t instanceof IOException){
+                    currentWeatherErrorImageView.setImageResource(R.drawable.no_internet);
+                    currentWeatherErrorTextView.setText(R.string.no_internet_problem);
+                    Toast.makeText(CurrentWeather.this, R.string.turn_on_internet, Toast.LENGTH_LONG).show();
+                    currentWeatherLayout.setVisibility(View.GONE);
+                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+                }
             }
         });
         RetrofitClientInstance.getINSTANCE().getFiveDayWeather(id).enqueue(new Callback<WeatherList>() {
@@ -605,7 +624,13 @@ public class CurrentWeather extends AppCompatActivity {
         }
     }
 
-    private void getSerachIntent() {
+    @Override
+    public boolean onSearchRequested(@Nullable SearchEvent searchEvent) {
+        return super.onSearchRequested(searchEvent);
+
+    }
+
+    private void getSearchIntent() {
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
@@ -630,7 +655,7 @@ public class CurrentWeather extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        getSerachIntent();
+        getSearchIntent();
     }
 
     @Override

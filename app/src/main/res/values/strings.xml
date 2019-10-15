@@ -15,4 +15,10 @@
     <string name="choose_a_city">Choose a city!</string>
     <string name="select">Select</string>
     <string name="loading_requset">Getting Weather Information. Please Wait!</string>
+    <string name="no_internet_problem">Ugh God! No internet connection!</string>
+    <string name="no_location_problem">Ugh God! Where are we?!</string>
+    <string name="common_problem">Sorry! There was a problem!</string>
+    <string name="turn_on_internet">Please turn on wifi or cell data</string>
+    <string name="turn_on_location">Please turn on device location</string>
+    <string name="try_again">Please try again</string>
 </resources>

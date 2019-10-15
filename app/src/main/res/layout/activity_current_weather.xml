@@ -16,16 +16,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:orientation="vertical"
         android:id="@+id/currentWeatherLoadingLinearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
         <ProgressBar
             android:id="@+id/currentWeatherLoadingView"
             android:layout_width="150dp"
@@ -33,13 +34,37 @@
             android:visibility="visible" />
 
         <TextView
-            android:layout_marginTop="@dimen/medium_margin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/medium_margin"
             android:text="@string/loading_requset"
             android:textColor="@android:color/black"
-            android:textSize="@dimen/medium_text"
-            />
+            android:textSize="@dimen/medium_text" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/currentWeatherErrorLinearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/currentWeatherErrorImageView"
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+             />
+        <TextView
+            android:id="@+id/currentWeatherErrorTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/large_text"
+            android:textColor="@android:color/black"/>
     </LinearLayout>
 
 

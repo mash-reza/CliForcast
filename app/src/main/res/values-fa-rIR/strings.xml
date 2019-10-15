@@ -15,5 +15,11 @@
     <string name="choose_a_city">یک شهر را انتخاب کنید!</string>
     <string name="select">انتخاب</string>
     <string name="loading_requset">درحال دریافت اطلاعات آب وهوا، لطفا منتظر بمانید!</string>
+    <string name="no_internet_problem">ای بابا! اینترنت قطعه!</string>
+    <string name="no_location_problem">ای بابا! کجاییم ما؟</string>
+    <string name="common_problem">پوزش. مشکلی پیش آمد!</string>
+    <string name="turn_on_internet">لطفا وای فای یا اتصال داده را روشن نمایید</string>
+    <string name="turn_on_location">لطفا مکان یاب دستگاه را روشن نمایید</string>
+    <string name="try_again">لطفا دوباره تلاش نمایید.</string>
 
 </resources>
