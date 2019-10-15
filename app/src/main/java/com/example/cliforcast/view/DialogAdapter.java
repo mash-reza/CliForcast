@@ -11,14 +11,12 @@ import com.example.cliforcast.R;
 
 import java.util.List;
 
-public class SearchAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
-
-
+public class DialogAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
     private Context context;
     private List<City> cities;
     private OnListItemSelected onListItemSelected;
 
-    public SearchAdapter(Context context, List<City> cities, OnListItemSelected onListItemSelected) {
+    public DialogAdapter(Context context, List<City> cities, OnListItemSelected onListItemSelected) {
         this.context = context;
         this.cities = cities;
         this.onListItemSelected = onListItemSelected;

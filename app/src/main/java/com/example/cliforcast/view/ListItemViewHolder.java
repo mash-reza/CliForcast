@@ -8,9 +8,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cliforcast.R;
 
-public class SearchViewHolder extends RecyclerView.ViewHolder {
+public class ListItemViewHolder extends RecyclerView.ViewHolder {
     TextView currentWeatherSearchItemTextView;
-    public SearchViewHolder(@NonNull View itemView) {
+    public ListItemViewHolder(@NonNull View itemView) {
         super(itemView);
         currentWeatherSearchItemTextView = itemView.findViewById(R.id.currentWeatherSearchItemTextView);
     }

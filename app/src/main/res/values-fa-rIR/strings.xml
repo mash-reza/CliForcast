@@ -12,5 +12,8 @@
     <string name="day5">پیش بینی روز پنجم</string>
     <string name="search_hint">جستجوی شهر یا استان...</string>
     <string name="search">جستجو</string>
+    <string name="choose_a_city">یک شهر را انتخاب کنید!</string>
+    <string name="select">انتخاب</string>
+
 
 </resources>

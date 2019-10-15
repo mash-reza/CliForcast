@@ -12,4 +12,6 @@
     <string name="day5">Fifth Day Forecast</string>
     <string name="search_hint">Search City or State...</string>
     <string name="search">Search</string>
+    <string name="choose_a_city">Choose a city!</string>
+    <string name="select">Select</string>
 </resources>

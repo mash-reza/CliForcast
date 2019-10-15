@@ -1,5 +1,5 @@
 package com.example.cliforcast.view;
 
-public interface OnSearchListSelected{
+public interface OnListItemSelected {
     void onSelect(int id);
 }

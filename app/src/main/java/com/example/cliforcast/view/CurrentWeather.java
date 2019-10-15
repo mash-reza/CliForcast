@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.ColumnInfo;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -18,11 +17,15 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,7 +71,10 @@ public class CurrentWeather extends AppCompatActivity {
     //GoogleApiClient client;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
+    InputStream in;
+    Reader reader;
     private List<City> cities;
+    City[] citiesArray;
 
     ConstraintLayout currentWeatherLayout;
     RecyclerView currentWeatherSearchRecyclerView;
@@ -100,21 +106,90 @@ public class CurrentWeather extends AppCompatActivity {
     ImageView currentWeatherForthDayIconImageView;
     TextView currentWeatherForthDayMinTempTextView;
 
+    RecyclerView dialogRecyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_weather);
 
+        in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities);
+        reader = new BufferedReader(new InputStreamReader(in));
         cities = new ArrayList<>();
+        citiesArray = new Gson().fromJson(reader, City[].class);
 
         preferences = getSharedPreferences(Constants.LOCATION_PREFERENCES, MODE_PRIVATE);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermission();
 
+        fillCitiesList("");
         initUi();
         //getCityForcast();
+        showChooseCityDialog();
         getSerachIntent();
+    }
+
+    private void fillCitiesList(String contained) {
+        if (contained.equals("")) {
+            this.cities.clear();
+            Collections.addAll(cities, citiesArray);
+        } else {
+            City tempCity = null;
+            for (int i = 0; i < cities.size(); i++) {
+                if (!cities.get(i).name.toLowerCase().contains(contained)) {
+                    tempCity = cities.get(i);
+                    cities.remove(tempCity);
+                } else {
+                    tempCity = cities.get(i);
+                    cities.add(tempCity);
+                }
+                if (dialogRecyclerView != null && dialogRecyclerView.getAdapter() != null)
+                    dialogRecyclerView.getAdapter().notifyDataSetChanged();
+                tempCity = null;
+            }
+        }
+
+    }
+
+    private void showChooseCityDialog() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setCancelable(false).create();
+        View dialog = LayoutInflater.from(getApplicationContext()).inflate(R.layout.select_city_dialog, null);
+        EditText dialogEditText = dialog.findViewById(R.id.selectCityDialogEditText);
+        dialogRecyclerView = dialog.findViewById(R.id.selectCityDialogRecyclerView);
+        dialogRecyclerView.setLayoutManager(
+                new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false)
+        );
+        dialogRecyclerView.setAdapter(new DialogAdapter(getApplicationContext(), cities, id -> {
+            cityId = id;
+            getCityForcast(cityId);
+            alertDialog.cancel();
+        }));
+        dialogEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.equals("")) {
+                    fillCitiesList("");
+                    if (dialogRecyclerView.getAdapter() != null) {
+                        dialogRecyclerView.getAdapter().notifyDataSetChanged();
+                    }
+                } else {
+                    fillCitiesList(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        alertDialog.setView(dialog);
+        alertDialog.show();
     }
 
     private void initUi() {
@@ -123,7 +198,7 @@ public class CurrentWeather extends AppCompatActivity {
         currentWeatherSearchRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false)
         );
-        SearchAdapter adapter = new SearchAdapter(getApplicationContext(), cities,(id) -> {
+        SearchAdapter adapter = new SearchAdapter(getApplicationContext(), cities, (id) -> {
             currentWeatherSearchRecyclerView.setVisibility(View.GONE);
             currentWeatherLayout.setVisibility(View.VISIBLE);
             cityId = id;
@@ -365,6 +440,8 @@ public class CurrentWeather extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+
         if (getLocation) {
             LocationRequest request = new LocationRequest();
             request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -522,8 +599,8 @@ public class CurrentWeather extends AppCompatActivity {
             Reader reader = new BufferedReader(new InputStreamReader(in));
             City[] cities = new Gson().fromJson(reader, City[].class);
             this.cities.clear();
-            for (City city:cities){
-                if(city.name.toLowerCase().contains(query)){
+            for (City city : cities) {
+                if (city.name.toLowerCase().contains(query)) {
                     this.cities.add(city);
                 }
             }
