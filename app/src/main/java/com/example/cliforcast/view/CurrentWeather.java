@@ -128,7 +128,7 @@ public class CurrentWeather extends AppCompatActivity {
 
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
-        in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities);
+        in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities_fa);
         reader = new BufferedReader(new InputStreamReader(in));
         cities = new ArrayList<>();
         citiesArray = new Gson().fromJson(reader, City[].class);
@@ -150,7 +150,6 @@ public class CurrentWeather extends AppCompatActivity {
     private void fillCitiesList() {
         this.cities.clear();
         Collections.addAll(cities, citiesArray);
-
     }
 
     private void showChooseCityDialog() {
@@ -822,7 +821,7 @@ public class CurrentWeather extends AppCompatActivity {
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            InputStream in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities);
+            InputStream in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities_fa);
             Reader reader = new BufferedReader(new InputStreamReader(in));
             City[] cities = new Gson().fromJson(reader, City[].class);
             this.cities.clear();
