@@ -168,11 +168,15 @@ public class Utility {
         String language = Locale.getDefault().getLanguage();
         switch (language) {
             case Constants.ENGLISH:
-
+                Date englishDate = new Date(epoch * 1000);
+//                SimpleDateFormat format = new SimpleDateFormat("EEEE,MMMM d,yyyy h:mm,a", Locale.ENGLISH);
+                SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d", Locale.ENGLISH);
+                format.setTimeZone(TimeZone.getDefault());
+                return format.format(englishDate);
             case Constants.PERSIAN:
-                PersianDate date = new PersianDate(epoch * 1000);
+                PersianDate persianDate = new PersianDate(epoch * 1000);
                 PersianDateFormat formater = new PersianDateFormat("l, j F");
-                return formater.format(date);
+                return formater.format(persianDate);
             default:
                 return null;
         }
