@@ -1,6 +1,7 @@
 package com.example.cliforcast.Util;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.cliforcast.R;
 
@@ -9,6 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import saman.zamani.persiandate.PersianDate;
+import saman.zamani.persiandate.PersianDateFormat;
 
 public class Utility {
     public static String idToStringMapper(Context context, int id) {
@@ -161,12 +165,17 @@ public class Utility {
     }
 
     public static String epochToDate(long epoch) {
-        Date date = new Date(epoch * 1000);
-//        SimpleDateFormat format = new SimpleDateFormat("EEEE,MMMM d,yyyy h:mm,a",Locale.ENGLISH);
-        SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d", Locale.ENGLISH);
-        format.setTimeZone(TimeZone.getDefault());
-        return format.format(date);
+        String language = Locale.getDefault().getLanguage();
+        switch (language) {
+            case Constants.ENGLISH:
 
+            case Constants.PERSIAN:
+                PersianDate date = new PersianDate(epoch * 1000);
+                PersianDateFormat formater = new PersianDateFormat("l, j F");
+                return formater.format(date);
+            default:
+                return null;
+        }
     }
 
     public static int mphToKmh(double mph) {

@@ -11,4 +11,6 @@ public class Constants {
     public static final String WIFI_PREFERENCES = "wifiPref";
     public static final String FIRST_LAUNCH_PREFERENCES = " firstLaunchPref";
     public static final String CITYID = "cityId";
+    public static final String PERSIAN = "fa";
+    public static final String ENGLISH = "en";
 }
