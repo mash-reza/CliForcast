@@ -21,5 +21,7 @@
     <string name="turn_on_internet">لطفا وای فای یا اتصال داده را روشن نمایید</string>
     <string name="turn_on_location">لطفا مکان یاب دستگاه را روشن نمایید</string>
     <string name="try_again">لطفا دوباره تلاش نمایید.</string>
+    <string name="now">اکنون</string>
+
 
 </resources>
