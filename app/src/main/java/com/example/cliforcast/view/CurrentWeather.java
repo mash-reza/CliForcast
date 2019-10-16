@@ -6,6 +6,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,6 +44,8 @@ import com.example.cliforcast.Util.Utility;
 import com.example.cliforcast.network.Weather;
 import com.example.cliforcast.network.RetrofitClientInstance;
 import com.example.cliforcast.network.WeatherList;
+import com.example.cliforcast.viewModel.CurrentWeatherViewModel;
+import com.example.cliforcast.viewModel.CurrentWeatherViewModelFactory;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -121,12 +126,21 @@ public class CurrentWeather extends AppCompatActivity {
     RecyclerView dialogRecyclerView;
 
 
+    LiveData<Weather> weatherLiveData;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_weather);
-
         preferences = getSharedPreferences(Constants.PREFERENCES, MODE_PRIVATE);
+
+//        viewModel = new CurrentWeatherViewModelFactory(getApplication(),preferences.getInt(Constants.CITYID,0)).create(new CurrentWeatherViewModel());
+        final CurrentWeatherViewModel viewModel = ViewModelProviders.of(this, new CurrentWeatherViewModelFactory(
+                getApplication(), preferences.getInt(Constants.CITYID, 0)
+        )).get(CurrentWeatherViewModel.class);
+
+
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
         in = getApplicationContext().getResources().openRawResource(R.raw.iran_cities_fa);
@@ -134,7 +148,6 @@ public class CurrentWeather extends AppCompatActivity {
         cities = new ArrayList<>();
         citiesArray = new Gson().fromJson(reader, City[].class);
         setIndexInArray(preferences.getInt(Constants.CITYID, 0));
-
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermission();
@@ -145,8 +158,19 @@ public class CurrentWeather extends AppCompatActivity {
         if (preferences.getBoolean(Constants.FIRST_LAUNCH_PREFERENCES, true)) {
             currentWeatherLayout.setVisibility(View.GONE);
             showChooseCityDialog();
-        } else getCityForcast(preferences.getInt(Constants.CITYID, 0));
+        } else {
+//            getCityForcast(preferences.getInt(Constants.CITYID, 0));
+            viewModel.getWeather().observe(this, weather -> {
+                currentWeatherCityNameTextView.setText(weather.getName());
+                currentWeatherTemperatureTextView.setText(String.valueOf(weather.getMain().getTemp()));
+            });
+
+        }
         getSearchIntent();
+    }
+
+    private void observeViewModel(CurrentWeatherViewModel viewModel) {
+
     }
 
     private void setIndexInArray(int cityID) {
@@ -596,70 +620,6 @@ public class CurrentWeather extends AppCompatActivity {
         });
     }
 
-//    private void getCityListForecast() {
-//        RetrofitClientInstance.getINSTANCE().getWeatherList(112931, 125188, 128747).enqueue(new Callback<WeatherList>() {
-//            @Override
-//            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<WeatherList> call, Throwable t) {
-//                Log.e(TAG, "onFailure: ", t);
-//            }
-//        });
-//    }
-
-    private void checkPermission() {
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION}, Constants.LOCATION_REQUSET_CODE);
-        }
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_WIFI_STATE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.ACCESS_WIFI_STATE}, Constants.WIFI_STATE_REQUSET_CODE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case Constants.LOCATION_REQUSET_CODE:
-                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    preferences.edit().putBoolean(Constants.LOCATION_PREFERENCES, true).apply();
-                } else {
-                    new AlertDialog.Builder(this)
-                            .setMessage(R.string.location_permission_rejected_messege_alert_dialog)
-                            .setPositiveButton(R.string.i_agree, (dialog, which) -> {
-                                checkPermission();
-                            })
-                            .setNegativeButton(R.string.i_disagree, (dialog, which) -> {
-                            })
-                            .create()
-                            .show();
-                }
-                break;
-            case Constants.WIFI_STATE_REQUSET_CODE:
-                if ((grantResults.length > 0) && (grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
-                    preferences.edit().putBoolean(Constants.WIFI_PREFERENCES, true).apply();
-                } else {
-                    new AlertDialog.Builder(this)
-                            .setMessage(R.string.wifit_permission_rejected_messege_alert_dialog)
-                            .setPositiveButton(R.string.i_agree, (dialog, which) -> {
-                                checkPermission();
-                            })
-                            .setNegativeButton(R.string.i_disagree, (dialog, which) -> {
-                            })
-                            .create()
-                            .show();
-                }
-
-        }
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -875,6 +835,56 @@ public class CurrentWeather extends AppCompatActivity {
             Toast.makeText(this, "please choose a city before quiting", Toast.LENGTH_SHORT).show();
         } else {
             finish();
+        }
+    }
+
+    private void checkPermission() {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION}, Constants.LOCATION_REQUSET_CODE);
+        }
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_WIFI_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_WIFI_STATE}, Constants.WIFI_STATE_REQUSET_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case Constants.LOCATION_REQUSET_CODE:
+                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    preferences.edit().putBoolean(Constants.LOCATION_PREFERENCES, true).apply();
+                } else {
+                    new AlertDialog.Builder(this)
+                            .setMessage(R.string.location_permission_rejected_messege_alert_dialog)
+                            .setPositiveButton(R.string.i_agree, (dialog, which) -> {
+                                checkPermission();
+                            })
+                            .setNegativeButton(R.string.i_disagree, (dialog, which) -> {
+                            })
+                            .create()
+                            .show();
+                }
+                break;
+            case Constants.WIFI_STATE_REQUSET_CODE:
+                if ((grantResults.length > 0) && (grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+                    preferences.edit().putBoolean(Constants.WIFI_PREFERENCES, true).apply();
+                } else {
+                    new AlertDialog.Builder(this)
+                            .setMessage(R.string.wifit_permission_rejected_messege_alert_dialog)
+                            .setPositiveButton(R.string.i_agree, (dialog, which) -> {
+                                checkPermission();
+                            })
+                            .setNegativeButton(R.string.i_disagree, (dialog, which) -> {
+                            })
+                            .create()
+                            .show();
+                }
+
         }
     }
 }
