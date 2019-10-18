@@ -18,6 +18,8 @@ import retrofit2.Response;
 
 public class CurrentWeatherViewModel extends ViewModel {
     private int cityId;
+    private double lat;
+    private double lon;
     private MutableLiveData<Weather> weatherObservable = new MutableLiveData<>();
     private MutableLiveData<WeatherList> weatherListObservable = new MutableLiveData<>();
 
@@ -37,7 +39,7 @@ public class CurrentWeatherViewModel extends ViewModel {
         return null;
     }
 
-    public void requestWeather() {
+    public void requestWeatherByCityID() {
         RetrofitClientInstance.getINSTANCE().getWeather(cityId).enqueue(new Callback<Weather>() {
             @Override
             public void onResponse(Call<Weather> call, Response<Weather> response) {
@@ -64,7 +66,39 @@ public class CurrentWeatherViewModel extends ViewModel {
         });
     }
 
+    public void requestWeatherByLatLon() {
+        RetrofitClientInstance.getINSTANCE().getWeather(lat,lon).enqueue(new Callback<Weather>() {
+            @Override
+            public void onResponse(Call<Weather> call, Response<Weather> response) {
+                if (response.body() != null)
+                    weatherObservable.postValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<Weather> call, Throwable t) {
+
+            }
+        });
+        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(lat,lon).enqueue(new Callback<WeatherList>() {
+            @Override
+            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
+                if (response.body() != null)
+                    weatherListObservable.postValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<WeatherList> call, Throwable t) {
+
+            }
+        });
+    }
+
     public void setCityId(int cityId) {
         this.cityId = cityId;
+    }
+
+    public void setLatLon(double lat,double lon){
+        this.lat = lat;
+        this.lon = lon;
     }
 }

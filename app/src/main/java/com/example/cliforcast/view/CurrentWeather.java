@@ -158,7 +158,7 @@ public class CurrentWeather extends AppCompatActivity {
             currentWeatherLayout.setVisibility(View.GONE);
             showChooseCityDialog();
         } else {
-            viewModel.requestWeather();
+            viewModel.requestWeatherByCityID();
             observeViewModel(viewModel);
         }
         getSearchIntent();
@@ -294,7 +294,7 @@ public class CurrentWeather extends AppCompatActivity {
             preferences.edit().putInt(Constants.CITYID, id).apply();
             setIndexInArray(id);
             viewModel.setCityId(id);
-            viewModel.requestWeather();
+            viewModel.requestWeatherByCityID();
         });
         currentWeatherSearchRecyclerView.setAdapter(adapter);
 
@@ -804,9 +804,9 @@ public class CurrentWeather extends AppCompatActivity {
                                 Toast.makeText(CurrentWeather.this, "null location result", Toast.LENGTH_SHORT).show();
                                 return;
                             }
-                            getCityForcast(
-                                    locationResult.getLastLocation().getLatitude(),
+                            viewModel.setLatLon(locationResult.getLastLocation().getLatitude(),
                                     locationResult.getLastLocation().getLongitude());
+                            viewModel.requestWeatherByLatLon();
                         }
                     }, Looper.getMainLooper());
 
