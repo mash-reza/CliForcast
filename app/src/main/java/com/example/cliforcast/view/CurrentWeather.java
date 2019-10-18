@@ -166,6 +166,7 @@ public class CurrentWeather extends AppCompatActivity {
 
     private void observeViewModel(CurrentWeatherViewModel viewModel) {
         viewModel.getWeather().observe(this, weather -> {
+            currentWeatherLayout.setVisibility(View.VISIBLE);
             currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp()) + "°");
             currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
             currentWeatherDescriptionTextView.setText(weather.getWeather()[0].getMain());
@@ -228,7 +229,9 @@ public class CurrentWeather extends AppCompatActivity {
         dialogRecyclerView.setAdapter(new DialogAdapter(getApplicationContext(), cities, id -> {
             preferences.edit().putInt(Constants.CITYID, id).apply();
             setIndexInArray(id);
-            getCityForcast(id);
+            viewModel.setCityId(id);
+            viewModel.requestWeatherByCityID();
+            observeViewModel(viewModel);
             alertDialog.cancel();
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(Constants.FIRST_LAUNCH_PREFERENCES, false).apply();
@@ -246,7 +249,8 @@ public class CurrentWeather extends AppCompatActivity {
                     dialogRecyclerView.setAdapter(new DialogAdapter(getApplicationContext(), cities, id -> {
                         preferences.edit().putInt(Constants.CITYID, id).apply();
                         setIndexInArray(id);
-                        getCityForcast(id);
+                        viewModel.setCityId(id);
+                        viewModel.requestWeatherByCityID();
                         alertDialog.cancel();
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putBoolean(Constants.FIRST_LAUNCH_PREFERENCES, false).apply();
@@ -261,7 +265,8 @@ public class CurrentWeather extends AppCompatActivity {
                     dialogRecyclerView.setAdapter(new DialogAdapter(getApplicationContext(), cities, id -> {
                         preferences.edit().putInt(Constants.CITYID, id).apply();
                         setIndexInArray(id);
-                        getCityForcast(id);
+                        viewModel.setCityId(id);
+                        viewModel.requestWeatherByCityID();
                         alertDialog.cancel();
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putBoolean(Constants.FIRST_LAUNCH_PREFERENCES, false).apply();
@@ -323,333 +328,6 @@ public class CurrentWeather extends AppCompatActivity {
         currentWeatherForthDayIconImageView = findViewById(R.id.currentWeatherForthDayIconImageView);
         currentWeatherForthDayMinTempTextView = findViewById(R.id.currentWeatherForthDayMinTempTextView);
 
-    }
-
-    private void getCityForcast(int id) {
-        currentWeatherErrorLinearLayout.setVisibility(View.GONE);
-        currentWeatherLayout.setVisibility(View.GONE);
-        currentWeatherLoadingLinearLayout.setVisibility(View.VISIBLE);
-        RetrofitClientInstance.getINSTANCE().getWeather(id).enqueue(new Callback<Weather>() {
-            @Override
-            public void onResponse(Call<Weather> call, Response<Weather> response) {
-                currentWeather = response.body();
-                AsyncTask.execute(() -> {
-                    com.example.cliforcast.database.Weather city = null;
-//                            RoomHelper.getInstance(getApplicationContext()).getDao().getCity(
-//                                    response.body().getCoord().getLat(),
-//                                    response.body().getCoord().getLon());
-                    if (city != null) {
-                        if (new Date().getTime() - (city.getTime()) < 1000) {
-                            runOnUiThread(() -> {
-                                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(city.getTemp()) + "°");
-                                currentWeatherCityNameTextView.setText(city.getName());
-                                currentWeatherDescriptionTextView.setText(city.getMain());
-                            });
-                        } else {
-                            runOnUiThread(() -> {
-                                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-//                                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
-                                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
-                                currentWeatherDescriptionTextView.setText(response.body().getWeather()[0].getMain());
-                                currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                                        response.body().getWeather()[0].getId()
-                                ));
-                                currentWeatherDateTextView.setText(Utility.epochToDate(response.body().getDate()));
-                                currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                                        getApplicationContext(), response.body().getWeather()[0].getId()
-                                ));
-                                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_max()) + "°");
-                                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_min()) + "°");
-                                currentWeatherWindTextView.setText(Utility.mphToKmh(response.body().getWind().getSpeed()) + " Kmh");
-                                currentWeatherCloudsTextView.setText(response.body().getClouds().getClouds() + "%");
-                                currentWeatherHumidityTextView.setText(response.body().getMain().getHumidity() + "%");
-                                currentWeatherNowIconImageView.setImageResource(
-                                        Utility.idToConditionMapper(
-                                                response.body().getWeather()[0].getId()
-                                        )
-                                );
-                                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-                            });
-                            {
-//                                RoomHelper.getInstance(getApplicationContext()).getDao().insertCity(new com.example.cliforcast.database.Weather(
-//                                        response.body().getCoord().getLon(),
-//                                        response.body().getCoord().getLat(),
-//                                        response.body().getWeather()[0].getMain(),
-//                                        response.body().getWeather()[0].getDescription(),
-//                                        response.body().getMain().getTemp(),
-//                                        response.body().getMain().getPressure(),
-//                                        response.body().getMain().getHumidity(),
-//                                        response.body().getMain().getTemp_min(),
-//                                        response.body().getMain().getTemp_max(),
-//                                        response.body().getWind().getSpeed(),
-//                                        response.body().getClouds().getClouds(),
-//                                        new Date().getTime(),
-//                                        response.body().getId(),
-//                                        response.body().getName()
-//                                ));
-                            }
-                        }
-                    } else {
-                        runOnUiThread(() -> {
-                            currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-                            currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
-                            currentWeatherDescriptionTextView.setText(response.body().getWeather()[0].getMain());
-                            currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                                    response.body().getWeather()[0].getId()
-                            ));
-                            currentWeatherDateTextView.setText(Utility.epochToDate(response.body().getDate()));
-                            currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                                    getApplicationContext(), response.body().getWeather()[0].getId()
-                            ));
-                            currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_max()) + "°");
-                            currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_min()) + "°");
-                            currentWeatherWindTextView.setText(Utility.mphToKmh(response.body().getWind().getSpeed()) + " Kmh");
-                            currentWeatherCloudsTextView.setText(response.body().getClouds().getClouds() + "%");
-                            currentWeatherHumidityTextView.setText(response.body().getMain().getHumidity() + "%");
-                            currentWeatherNowIconImageView.setImageResource(
-                                    Utility.idToConditionMapper(
-                                            response.body().getWeather()[0].getId()
-                                    )
-                            );
-                            currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-                        });
-                        {
-//                            RoomHelper.getInstance(getApplicationContext()).getDao().insertCity(new com.example.cliforcast.database.Weather(
-//                                    response.body().getCoord().getLon(),
-//                                    response.body().getCoord().getLat(),
-//                                    response.body().getWeather()[0].getMain(),
-//                                    response.body().getWeather()[0].getDescription(),
-//                                    response.body().getMain().getTemp(),
-//                                    response.body().getMain().getPressure(),
-//                                    response.body().getMain().getHumidity(),
-//                                    response.body().getMain().getTemp_min(),
-//                                    response.body().getMain().getTemp_max(),
-//                                    response.body().getWind().getSpeed(),
-//                                    response.body().getClouds().getClouds(),
-//                                    new Date().getTime(),
-//                                    response.body().getId(),
-//                                    response.body().getName()
-//                            ));
-                        }
-                    }
-                });
-                isCityResponseSuccessful = true;
-                currentWeatherErrorLinearLayout.setVisibility(View.GONE);
-                currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
-                currentWeatherLayout.setVisibility(View.VISIBLE);
-
-            }
-
-            @Override
-            public void onFailure(Call<Weather> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + t.getMessage());
-                if (t instanceof IOException) {
-                    currentWeatherErrorImageView.setImageResource(R.drawable.no_internet);
-                    currentWeatherErrorTextView.setText(R.string.no_internet_problem);
-                    Toast.makeText(CurrentWeather.this, R.string.turn_on_internet, Toast.LENGTH_LONG).show();
-                    currentWeatherLayout.setVisibility(View.GONE);
-                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
-                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
-                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
-                }
-//                if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-//                    currentWeatherErrorImageView.setImageResource(R.drawable.no_location);
-//                    currentWeatherErrorTextView.setText(R.string.no_location_problem);
-//                    Toast.makeText(CurrentWeather.this, R.string.turn_on_location, Toast.LENGTH_LONG).show();
-//                    currentWeatherLayout.setVisibility(View.GONE);
-//                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
-//                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
-//                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
-//                }
-            }
-        });
-        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(id).enqueue(new Callback<WeatherList>() {
-            @Override
-            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
-                fiveDayWeather = response.body();
-                isFiveDayResponseSuccessful = true;
-                currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[8].getMain().getTemp_max()) + "°");
-                currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[8].getMain().getTemp_min()) + "°");
-                currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[8].getWeather()[0].getId()));
-                currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[16].getMain().getTemp_max()) + "°");
-                currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[16].getMain().getTemp_min()) + "°");
-                currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[16].getWeather()[0].getId()));
-                currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[24].getMain().getTemp_max()) + "°");
-                currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[24].getMain().getTemp_min()) + "°");
-                currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[24].getWeather()[0].getId()));
-                currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[32].getMain().getTemp_max()) + "°");
-                currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[32].getMain().getTemp_min()) + "°");
-                currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[32].getWeather()[0].getId()));
-            }
-
-            @Override
-            public void onFailure(Call<WeatherList> call, Throwable t) {
-                Log.i(TAG, "onFailure: " + t.getLocalizedMessage());
-            }
-        });
-    }
-
-    private void getCityForcast(double lat, double lon) {
-        currentWeatherErrorLinearLayout.setVisibility(View.GONE);
-        currentWeatherLayout.setVisibility(View.GONE);
-        currentWeatherLoadingLinearLayout.setVisibility(View.VISIBLE);
-        RetrofitClientInstance.getINSTANCE().getWeather(lat, lon).enqueue(new Callback<Weather>() {
-            @Override
-            public void onResponse(Call<Weather> call, Response<Weather> response) {
-                currentWeather = response.body();
-                AsyncTask.execute(() -> {
-                    com.example.cliforcast.database.Weather city = null;
-//                            RoomHelper.getInstance(getApplicationContext()).getDao().getCity(
-//                                    response.body().getCoord().getLat(),
-//                                    response.body().getCoord().getLon());
-                    if (city != null) {
-                        if (new Date().getTime() - (city.getTime()) < 1000) {
-                            runOnUiThread(() -> {
-                                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(city.getTemp()) + "°");
-                                currentWeatherCityNameTextView.setText(city.getName());
-                                currentWeatherDescriptionTextView.setText(city.getMain());
-                            });
-                        } else {
-                            runOnUiThread(() -> {
-                                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-
-                                currentWeatherDescriptionTextView.setText(response.body().getWeather()[0].getMain());
-                                currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                                        response.body().getWeather()[0].getId()
-                                ));
-                                currentWeatherDateTextView.setText(Utility.epochToDate(response.body().getDate()));
-                                currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                                        getApplicationContext(), response.body().getWeather()[0].getId()
-                                ));
-                                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_max()) + "°");
-                                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_min()) + "°");
-                                currentWeatherWindTextView.setText(Utility.mphToKmh(response.body().getWind().getSpeed()) + " Kmh");
-                                currentWeatherCloudsTextView.setText(response.body().getClouds().getClouds() + "%");
-                                currentWeatherHumidityTextView.setText(response.body().getMain().getHumidity() + "%");
-                                currentWeatherNowIconImageView.setImageResource(
-                                        Utility.idToConditionMapper(
-                                                response.body().getWeather()[0].getId()
-                                        )
-                                );
-                                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-                            });
-                            {
-//                                RoomHelper.getInstance(getApplicationContext()).getDao().insertCity(new com.example.cliforcast.database.Weather(
-//                                        response.body().getCoord().getLon(),
-//                                        response.body().getCoord().getLat(),
-//                                        response.body().getWeather()[0].getMain(),
-//                                        response.body().getWeather()[0].getDescription(),
-//                                        response.body().getMain().getTemp(),
-//                                        response.body().getMain().getPressure(),
-//                                        response.body().getMain().getHumidity(),
-//                                        response.body().getMain().getTemp_min(),
-//                                        response.body().getMain().getTemp_max(),
-//                                        response.body().getWind().getSpeed(),
-//                                        response.body().getClouds().getClouds(),
-//                                        new Date().getTime(),
-//                                        response.body().getId(),
-//                                        response.body().getName()
-//                                ));
-                            }
-                        }
-                    } else {
-                        runOnUiThread(() -> {
-                            currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-                            currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
-                            currentWeatherDescriptionTextView.setText(response.body().getWeather()[0].getMain());
-                            currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                                    response.body().getWeather()[0].getId()
-                            ));
-                            currentWeatherDateTextView.setText(Utility.epochToDate(response.body().getDate()));
-                            currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                                    getApplicationContext(), response.body().getWeather()[0].getId()
-                            ));
-                            currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_max()) + "°");
-                            currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp_min()) + "°");
-                            currentWeatherWindTextView.setText(Utility.mphToKmh(response.body().getWind().getSpeed()) + " Kmh");
-                            currentWeatherCloudsTextView.setText(response.body().getClouds().getClouds() + "%");
-                            currentWeatherHumidityTextView.setText(response.body().getMain().getHumidity() + "%");
-                            currentWeatherNowIconImageView.setImageResource(
-                                    Utility.idToConditionMapper(
-                                            response.body().getWeather()[0].getId()
-                                    )
-                            );
-                            currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(response.body().getMain().getTemp()) + "°");
-                        });
-                        {
-//                            RoomHelper.getInstance(getApplicationContext()).getDao().insertCity(new com.example.cliforcast.database.Weather(
-//                                    response.body().getCoord().getLon(),
-//                                    response.body().getCoord().getLat(),
-//                                    response.body().getWeather()[0].getMain(),
-//                                    response.body().getWeather()[0].getDescription(),
-//                                    response.body().getMain().getTemp(),
-//                                    response.body().getMain().getPressure(),
-//                                    response.body().getMain().getHumidity(),
-//                                    response.body().getMain().getTemp_min(),
-//                                    response.body().getMain().getTemp_max(),
-//                                    response.body().getWind().getSpeed(),
-//                                    response.body().getClouds().getClouds(),
-//                                    new Date().getTime(),
-//                                    response.body().getId(),
-//                                    response.body().getName()
-//                            ));
-                        }
-                    }
-                });
-                isCityResponseSuccessful = true;
-                currentWeatherErrorLinearLayout.setVisibility(View.GONE);
-                currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
-                currentWeatherLayout.setVisibility(View.VISIBLE);
-
-            }
-
-            @Override
-            public void onFailure(Call<Weather> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + t.getMessage());
-                if (t instanceof IOException) {
-                    currentWeatherErrorImageView.setImageResource(R.drawable.no_internet);
-                    currentWeatherErrorTextView.setText(R.string.no_internet_problem);
-                    Toast.makeText(CurrentWeather.this, R.string.turn_on_internet, Toast.LENGTH_LONG).show();
-                    currentWeatherLayout.setVisibility(View.GONE);
-                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
-                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
-                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
-                }
-//                if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-//                    currentWeatherErrorImageView.setImageResource(R.drawable.no_location);
-//                    currentWeatherErrorTextView.setText(R.string.no_location_problem);
-//                    Toast.makeText(CurrentWeather.this, R.string.turn_on_location, Toast.LENGTH_LONG).show();
-//                    currentWeatherLayout.setVisibility(View.GONE);
-//                    currentWeatherSearchRecyclerView.setVisibility(View.GONE);
-//                    currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
-//                    currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
-//                }
-            }
-        });
-        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(lat, lon).enqueue(new Callback<WeatherList>() {
-            @Override
-            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
-                fiveDayWeather = response.body();
-                isFiveDayResponseSuccessful = true;
-                currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[8].getMain().getTemp_max()) + "°");
-                currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[8].getMain().getTemp_min()) + "°");
-                currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[8].getWeather()[0].getId()));
-                currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[16].getMain().getTemp_max()) + "°");
-                currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[16].getMain().getTemp_min()) + "°");
-                currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[16].getWeather()[0].getId()));
-                currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[24].getMain().getTemp_max()) + "°");
-                currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[24].getMain().getTemp_min()) + "°");
-                currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[24].getWeather()[0].getId()));
-                currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[32].getMain().getTemp_max()) + "°");
-                currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(response.body().getWeather()[32].getMain().getTemp_min()) + "°");
-                currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(response.body().getWeather()[32].getWeather()[0].getId()));
-            }
-
-            @Override
-            public void onFailure(Call<WeatherList> call, Throwable t) {
-                Log.i(TAG, "onFailure: " + t.getLocalizedMessage());
-            }
-        });
     }
 
     @Override
