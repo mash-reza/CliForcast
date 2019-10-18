@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -127,7 +126,7 @@ public class CurrentWeather extends AppCompatActivity {
 
 
     LiveData<Weather> weatherLiveData;
-
+    CurrentWeatherViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +135,7 @@ public class CurrentWeather extends AppCompatActivity {
         preferences = getSharedPreferences(Constants.PREFERENCES, MODE_PRIVATE);
 
 //        viewModel = new CurrentWeatherViewModelFactory(getApplication(),preferences.getInt(Constants.CITYID,0)).create(new CurrentWeatherViewModel());
-        final CurrentWeatherViewModel viewModel = ViewModelProviders.of(this, new CurrentWeatherViewModelFactory(
+        viewModel = ViewModelProviders.of(this, new CurrentWeatherViewModelFactory(
                 getApplication(), preferences.getInt(Constants.CITYID, 0)
         )).get(CurrentWeatherViewModel.class);
 
@@ -159,18 +158,50 @@ public class CurrentWeather extends AppCompatActivity {
             currentWeatherLayout.setVisibility(View.GONE);
             showChooseCityDialog();
         } else {
-//            getCityForcast(preferences.getInt(Constants.CITYID, 0));
-            viewModel.getWeather().observe(this, weather -> {
-                currentWeatherCityNameTextView.setText(weather.getName());
-                currentWeatherTemperatureTextView.setText(String.valueOf(weather.getMain().getTemp()));
-            });
-
+            viewModel.requestWeather();
+            observeViewModel(viewModel);
         }
         getSearchIntent();
     }
 
     private void observeViewModel(CurrentWeatherViewModel viewModel) {
-
+        viewModel.getWeather().observe(this, weather -> {
+            currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp()) + "°");
+            currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+            currentWeatherDescriptionTextView.setText(weather.getWeather()[0].getMain());
+            currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
+                    weather.getWeather()[0].getId()
+            ));
+            currentWeatherDateTextView.setText(Utility.epochToDate(weather.getDate()));
+            currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
+                    getApplicationContext(), weather.getWeather()[0].getId()
+            ));
+            currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp_max()) + "°");
+            currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp_min()) + "°");
+            currentWeatherWindTextView.setText(Utility.mphToKmh(weather.getWind().getSpeed()) + " Kmh");
+            currentWeatherCloudsTextView.setText(weather.getClouds().getClouds() + "%");
+            currentWeatherHumidityTextView.setText(weather.getMain().getHumidity() + "%");
+            currentWeatherNowIconImageView.setImageResource(
+                    Utility.idToConditionMapper(
+                            weather.getWeather()[0].getId()
+                    )
+            );
+            currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp()) + "°");
+        });
+        viewModel.getWeatherList().observe(this, weatherList -> {
+            currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[8].getMain().getTemp_max()) + "°");
+            currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[8].getMain().getTemp_min()) + "°");
+            currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[8].getWeather()[0].getId()));
+            currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[16].getMain().getTemp_max()) + "°");
+            currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[16].getMain().getTemp_min()) + "°");
+            currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[16].getWeather()[0].getId()));
+            currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[24].getMain().getTemp_max()) + "°");
+            currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[24].getMain().getTemp_min()) + "°");
+            currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[24].getWeather()[0].getId()));
+            currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[36].getMain().getTemp_max()) + "°");
+            currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[36].getMain().getTemp_min()) + "°");
+            currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[36].getWeather()[0].getId()));
+        });
     }
 
     private void setIndexInArray(int cityID) {
@@ -262,7 +293,8 @@ public class CurrentWeather extends AppCompatActivity {
             currentWeatherLayout.setVisibility(View.VISIBLE);
             preferences.edit().putInt(Constants.CITYID, id).apply();
             setIndexInArray(id);
-            getCityForcast(id);
+            viewModel.setCityId(id);
+            viewModel.requestWeather();
         });
         currentWeatherSearchRecyclerView.setAdapter(adapter);
 

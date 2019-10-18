@@ -17,14 +17,27 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CurrentWeatherViewModel extends ViewModel {
-    private Application application;
     private int cityId;
     private MutableLiveData<Weather> weatherObservable = new MutableLiveData<>();
-    private MutableLiveData<WeatherList> weatherListObservable= new MutableLiveData<>();
+    private MutableLiveData<WeatherList> weatherListObservable = new MutableLiveData<>();
 
-    public CurrentWeatherViewModel(int cityId, Application application) {
+    public CurrentWeatherViewModel(int cityId) {
         this.cityId = cityId;
-        this.application = application;
+    }
+
+    public MutableLiveData<Weather> getWeather() {
+        if (weatherObservable != null)
+            return weatherObservable;
+        return null;
+    }
+
+    public MutableLiveData<WeatherList> getWeatherList() {
+        if (weatherListObservable != null)
+            return weatherListObservable;
+        return null;
+    }
+
+    public void requestWeather() {
         RetrofitClientInstance.getINSTANCE().getWeather(cityId).enqueue(new Callback<Weather>() {
             @Override
             public void onResponse(Call<Weather> call, Response<Weather> response) {
@@ -37,13 +50,21 @@ public class CurrentWeatherViewModel extends ViewModel {
 
             }
         });
+        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(cityId).enqueue(new Callback<WeatherList>() {
+            @Override
+            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
+                if (response.body() != null)
+                    weatherListObservable.postValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<WeatherList> call, Throwable t) {
+
+            }
+        });
     }
 
-    public MutableLiveData<Weather> getWeather() {
-        return weatherObservable;
-    }
-
-    public MutableLiveData<WeatherList> getWeatherList() {
-        return weatherListObservable;
+    public void setCityId(int cityId) {
+        this.cityId = cityId;
     }
 }
