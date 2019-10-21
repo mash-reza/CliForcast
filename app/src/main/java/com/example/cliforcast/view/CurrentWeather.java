@@ -116,6 +116,8 @@ public class CurrentWeather extends AppCompatActivity {
 
     RecyclerView dialogRecyclerView;
 
+    Menu menu;
+
 
     LiveData<Weather> weatherLiveData;
     CurrentWeatherViewModel viewModel;
@@ -534,6 +536,7 @@ public class CurrentWeather extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -576,6 +579,19 @@ public class CurrentWeather extends AppCompatActivity {
 
                 } else
                     Toast.makeText(this, R.string.turn_on_location, Toast.LENGTH_LONG).show();
+                return true;
+            case R.id.currentWeatherRefreshMenuItem:
+                MenuItem locationMenuItem = this.menu.findItem(R.id.currentWeatherLocationMenuItem);
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    locationMenuItem.setIcon(R.drawable.location_on_icon);
+                else
+                    locationMenuItem.setIcon(R.drawable.location_off_icon);
+
+                if(!viewModel.isRequestedByLocation()){
+                    viewModel.requestWeatherByCityID();
+                }else {
+                    viewModel.requestWeatherByLatLon();
+                }
                 return true;
             default:
                 return true;

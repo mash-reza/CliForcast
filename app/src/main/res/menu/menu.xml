@@ -11,6 +11,12 @@
         android:id="@+id/currentWeatherLocationMenuItem"
         android:icon="@drawable/location_on_icon"
         android:orderInCategory="200"
-        android:title="@string/search"
+        android:title="@string/location"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/currentWeatherRefreshMenuItem"
+        android:icon="@drawable/refresh_icon"
+        android:orderInCategory="300"
+        android:title="@string/refresh"
         app:showAsAction="ifRoom" />
 </menu>
