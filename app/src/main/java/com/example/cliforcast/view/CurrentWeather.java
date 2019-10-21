@@ -19,12 +19,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,8 +38,8 @@ import android.widget.Toast;
 import com.example.cliforcast.R;
 import com.example.cliforcast.Util.Constants;
 import com.example.cliforcast.Util.Utility;
+import com.example.cliforcast.network.Error;
 import com.example.cliforcast.network.Weather;
-import com.example.cliforcast.network.RetrofitClientInstance;
 import com.example.cliforcast.network.WeatherList;
 import com.example.cliforcast.viewModel.CurrentWeatherViewModel;
 import com.example.cliforcast.viewModel.CurrentWeatherViewModelFactory;
@@ -53,18 +51,12 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class CurrentWeather extends AppCompatActivity {
     private static final String TAG = "CurrentWeather";
@@ -165,50 +157,124 @@ public class CurrentWeather extends AppCompatActivity {
     }
 
     private void observeViewModel(CurrentWeatherViewModel viewModel) {
+
         viewModel.getWeather().observe(this, weather -> {
-            currentWeather = weather;
-            currentWeatherLayout.setVisibility(View.VISIBLE);
-            currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp()) + "°");
-            if (!viewModel.isRequestedByLocation())
-                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
-            else
-                currentWeatherCityNameTextView.setText(weather.getName());
-            currentWeatherDescriptionTextView.setText(weather.getWeather()[0].getMain());
-            currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                    weather.getWeather()[0].getId()
-            ));
-            currentWeatherDateTextView.setText(Utility.epochToDate(weather.getDate()));
-            currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                    getApplicationContext(), weather.getWeather()[0].getId()
-            ));
-            currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp_max()) + "°");
-            currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp_min()) + "°");
-            currentWeatherWindTextView.setText(Utility.mphToKmh(weather.getWind().getSpeed()) + " Kmh");
-            currentWeatherCloudsTextView.setText(weather.getClouds().getClouds() + "%");
-            currentWeatherHumidityTextView.setText(weather.getMain().getHumidity() + "%");
-            currentWeatherNowIconImageView.setImageResource(
-                    Utility.idToConditionMapper(
-                            weather.getWeather()[0].getId()
-                    )
-            );
-            currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp()) + "°");
+            if (weather.getError().equals(Error.NO_ERROR)) {
+                currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                currentWeatherErrorLinearLayout.setVisibility(View.GONE);
+                currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                currentWeatherLayout.setVisibility(View.VISIBLE);
+                currentWeather = weather.getWeather();
+                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp()) + "°");
+                if (!viewModel.isRequestedByLocation())
+                    currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                else
+                    currentWeatherCityNameTextView.setText(weather.getWeather().getName());
+                currentWeatherDescriptionTextView.setText(weather.getWeather().getWeather()[0].getMain());
+                currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
+                        weather.getWeather().getWeather()[0].getId()
+                ));
+                currentWeatherDateTextView.setText(Utility.epochToDate(weather.getWeather().getDate()));
+                currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
+                        getApplicationContext(), weather.getWeather().getWeather()[0].getId()
+                ));
+                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp_max()) + "°");
+                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp_min()) + "°");
+                currentWeatherWindTextView.setText(Utility.mphToKmh(weather.getWeather().getWind().getSpeed()) + " Kmh");
+                currentWeatherCloudsTextView.setText(weather.getWeather().getClouds().getClouds() + "%");
+                currentWeatherHumidityTextView.setText(weather.getWeather().getMain().getHumidity() + "%");
+                currentWeatherNowIconImageView.setImageResource(
+                        Utility.idToConditionMapper(
+                                weather.getWeather().getWeather()[0].getId()
+                        )
+                );
+                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp()) + "°");
+            } else {
+                switch (weather.getError()) {
+                    case REQUEST_NOT_COMPELLED:
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherErrorLinearLayout.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.VISIBLE);
+                        break;
+                    case NO_INTERNET:
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                        currentWeatherErrorImageView.setImageResource(R.drawable.no_internet);
+                        currentWeatherErrorTextView.setText(R.string.no_internet_problem);
+                        currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+                        break;
+                    case NO_LOCATION:
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                        currentWeatherErrorImageView.setImageResource(R.drawable.no_location);
+                        currentWeatherErrorTextView.setText(R.string.no_location_problem);
+                        currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+                        break;
+                    case COMMON:
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                        currentWeatherErrorImageView.setImageResource(R.drawable.error);
+                        currentWeatherErrorTextView.setText(R.string.common_problem);
+                        currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+                }
+            }
         });
         viewModel.getWeatherList().observe(this, weatherList -> {
-            fiveDayWeather = weatherList;
-            currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[8].getMain().getTemp_max()) + "°");
-            currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[8].getMain().getTemp_min()) + "°");
-            currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[8].getWeather()[0].getId()));
-            currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[16].getMain().getTemp_max()) + "°");
-            currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[16].getMain().getTemp_min()) + "°");
-            currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[16].getWeather()[0].getId()));
-            currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[24].getMain().getTemp_max()) + "°");
-            currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[24].getMain().getTemp_min()) + "°");
-            currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[24].getWeather()[0].getId()));
-            currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[36].getMain().getTemp_max()) + "°");
-            currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[36].getMain().getTemp_min()) + "°");
-            currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[36].getWeather()[0].getId()));
+            if (weatherList.getError().equals(Error.NO_ERROR)) {
+                fiveDayWeather = weatherList.getWeather();
+                currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[8].getMain().getTemp_max()) + "°");
+                currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[8].getMain().getTemp_min()) + "°");
+                currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[8].getWeather()[0].getId()));
+                currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[16].getMain().getTemp_max()) + "°");
+                currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[16].getMain().getTemp_min()) + "°");
+                currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[16].getWeather()[0].getId()));
+                currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[24].getMain().getTemp_max()) + "°");
+                currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[24].getMain().getTemp_min()) + "°");
+                currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[24].getWeather()[0].getId()));
+                currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[36].getMain().getTemp_max()) + "°");
+                currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[36].getMain().getTemp_min()) + "°");
+                currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[36].getWeather()[0].getId()));
+            } else {
+                switch (weatherList.getError()) {
+                    case REQUEST_NOT_COMPELLED:
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherErrorLinearLayout.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.VISIBLE);
+                        break;
+                    case NO_INTERNET:
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                        currentWeatherErrorImageView.setImageResource(R.drawable.no_internet);
+                        currentWeatherErrorTextView.setText(R.string.no_internet_problem);
+                        currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+                        break;
+                    case NO_LOCATION:
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                        currentWeatherErrorImageView.setImageResource(R.drawable.no_location);
+                        currentWeatherErrorTextView.setText(R.string.no_location_problem);
+                        currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+                        break;
+                    case COMMON:
+                        currentWeatherLayout.setVisibility(View.GONE);
+                        currentWeatherSearchRecyclerView.setVisibility(View.GONE);
+                        currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
+                        currentWeatherErrorImageView.setImageResource(R.drawable.error);
+                        currentWeatherErrorTextView.setText(R.string.common_problem);
+                        currentWeatherErrorLinearLayout.setVisibility(View.VISIBLE);
+
+                }
+            }
         });
     }
+
 
     private void setIndexInArray(int cityID) {
         if (cityID != 0)
@@ -423,7 +489,8 @@ public class CurrentWeather extends AppCompatActivity {
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
-                    currentWeatherCityNameTextView.setText(currentWeather.getName());                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[24].getWeather()[0].getMain());
+                    currentWeatherCityNameTextView.setText(currentWeather.getName());
+                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[24].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                         fiveDayWeather.getWeather()[24].getWeather()[0].getId()
                 ));
@@ -445,7 +512,8 @@ public class CurrentWeather extends AppCompatActivity {
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
-                    currentWeatherCityNameTextView.setText(currentWeather.getName());                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[32].getWeather()[0].getMain());
+                    currentWeatherCityNameTextView.setText(currentWeather.getName());
+                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[32].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                         fiveDayWeather.getWeather()[32].getWeather()[0].getId()
                 ));
