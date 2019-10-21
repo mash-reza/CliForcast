@@ -22,6 +22,7 @@ public class CurrentWeatherViewModel extends ViewModel {
     private double lon;
     private MutableLiveData<Weather> weatherObservable = new MutableLiveData<>();
     private MutableLiveData<WeatherList> weatherListObservable = new MutableLiveData<>();
+    private boolean requestedByLocation = false;
 
     public CurrentWeatherViewModel(int cityId) {
         this.cityId = cityId;
@@ -43,8 +44,10 @@ public class CurrentWeatherViewModel extends ViewModel {
         RetrofitClientInstance.getINSTANCE().getWeather(cityId).enqueue(new Callback<Weather>() {
             @Override
             public void onResponse(Call<Weather> call, Response<Weather> response) {
-                if (response.body() != null)
+                if (response.body() != null) {
+                    requestedByLocation = false;
                     weatherObservable.postValue(response.body());
+                }
             }
 
             @Override
@@ -67,11 +70,13 @@ public class CurrentWeatherViewModel extends ViewModel {
     }
 
     public void requestWeatherByLatLon() {
-        RetrofitClientInstance.getINSTANCE().getWeather(lat,lon).enqueue(new Callback<Weather>() {
+        RetrofitClientInstance.getINSTANCE().getWeather(lat, lon).enqueue(new Callback<Weather>() {
             @Override
             public void onResponse(Call<Weather> call, Response<Weather> response) {
-                if (response.body() != null)
+                if (response.body() != null) {
+                    requestedByLocation = true;
                     weatherObservable.postValue(response.body());
+                }
             }
 
             @Override
@@ -79,7 +84,7 @@ public class CurrentWeatherViewModel extends ViewModel {
 
             }
         });
-        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(lat,lon).enqueue(new Callback<WeatherList>() {
+        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(lat, lon).enqueue(new Callback<WeatherList>() {
             @Override
             public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
                 if (response.body() != null)
@@ -97,8 +102,12 @@ public class CurrentWeatherViewModel extends ViewModel {
         this.cityId = cityId;
     }
 
-    public void setLatLon(double lat,double lon){
+    public void setLatLon(double lat, double lon) {
         this.lat = lat;
         this.lon = lon;
+    }
+
+    public boolean isRequestedByLocation() {
+        return requestedByLocation;
     }
 }

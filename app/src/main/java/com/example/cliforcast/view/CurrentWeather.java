@@ -166,9 +166,13 @@ public class CurrentWeather extends AppCompatActivity {
 
     private void observeViewModel(CurrentWeatherViewModel viewModel) {
         viewModel.getWeather().observe(this, weather -> {
+            currentWeather = weather;
             currentWeatherLayout.setVisibility(View.VISIBLE);
             currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp()) + "°");
-            currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+            if (!viewModel.isRequestedByLocation())
+                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+            else
+                currentWeatherCityNameTextView.setText(weather.getName());
             currentWeatherDescriptionTextView.setText(weather.getWeather()[0].getMain());
             currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                     weather.getWeather()[0].getId()
@@ -190,6 +194,7 @@ public class CurrentWeather extends AppCompatActivity {
             currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(weather.getMain().getTemp()) + "°");
         });
         viewModel.getWeatherList().observe(this, weatherList -> {
+            fiveDayWeather = weatherList;
             currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[8].getMain().getTemp_max()) + "°");
             currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather()[8].getMain().getTemp_min()) + "°");
             currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather()[8].getWeather()[0].getId()));
@@ -338,9 +343,12 @@ public class CurrentWeather extends AppCompatActivity {
 
     private void fiveDayEventControl() {
         currentWeatherNowIconImageView.setOnClickListener(v -> {
-            if (isFiveDayResponseSuccessful && isCityResponseSuccessful) {
+            if (currentWeather != null) {
                 currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(currentWeather.getMain().getTemp()) + "°");
-
+                if (!viewModel.isRequestedByLocation())
+                    currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                else
+                    currentWeatherCityNameTextView.setText(currentWeather.getName());
                 currentWeatherDescriptionTextView.setText(currentWeather.getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                         currentWeather.getWeather()[0].getId()
@@ -363,10 +371,13 @@ public class CurrentWeather extends AppCompatActivity {
             }
         });
         currentWeatherFirstDayIconImageView.setOnClickListener(v -> {
-            if (isFiveDayResponseSuccessful && isCityResponseSuccessful) {
+            if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day1, Toast.LENGTH_SHORT).show();
                 currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[8].getMain().getTemp()) + "°");
-                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                if (!viewModel.isRequestedByLocation())
+                    currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                else
+                    currentWeatherCityNameTextView.setText(currentWeather.getName());
                 currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[8].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                         fiveDayWeather.getWeather()[8].getWeather()[0].getId()
@@ -383,10 +394,13 @@ public class CurrentWeather extends AppCompatActivity {
             }
         });
         currentWeatherSecondDayIconImageView.setOnClickListener(v -> {
-            if (isFiveDayResponseSuccessful && isCityResponseSuccessful) {
+            if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day2, Toast.LENGTH_SHORT).show();
                 currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[16].getMain().getTemp()) + "°");
-                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                if (!viewModel.isRequestedByLocation())
+                    currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                else
+                    currentWeatherCityNameTextView.setText(currentWeather.getName());
                 currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[16].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                         fiveDayWeather.getWeather()[16].getWeather()[0].getId()
@@ -403,11 +417,13 @@ public class CurrentWeather extends AppCompatActivity {
             }
         });
         currentWeatherThirdDayIconImageView.setOnClickListener(v -> {
-            if (isFiveDayResponseSuccessful && isCityResponseSuccessful) {
+            if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day3, Toast.LENGTH_SHORT).show();
                 currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[24].getMain().getTemp()) + "°");
-                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
-                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[24].getWeather()[0].getMain());
+                if (!viewModel.isRequestedByLocation())
+                    currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                else
+                    currentWeatherCityNameTextView.setText(currentWeather.getName());                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[24].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                         fiveDayWeather.getWeather()[24].getWeather()[0].getId()
                 ));
@@ -423,11 +439,13 @@ public class CurrentWeather extends AppCompatActivity {
             }
         });
         currentWeatherForthDayIconImageView.setOnClickListener(v -> {
-            if (isFiveDayResponseSuccessful && isCityResponseSuccessful) {
+            if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day4, Toast.LENGTH_SHORT).show();
                 currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[32].getMain().getTemp()) + "°");
-                currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
-                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[32].getWeather()[0].getMain());
+                if (!viewModel.isRequestedByLocation())
+                    currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
+                else
+                    currentWeatherCityNameTextView.setText(currentWeather.getName());                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[32].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
                         fiveDayWeather.getWeather()[32].getWeather()[0].getId()
                 ));
