@@ -13,5 +13,8 @@ public class Constants {
     public static final String CITYID = "cityId";
     public static final String PERSIAN = "fa";
     public static final String ENGLISH = "en";
-    public static final int RELOAD_NETWORK_TIMEOUT = 3600000;
+    public static final int REQUEST_BY_ID_TIMEOUT = 3600000;
+    public static final int REQUEST_BY_LOCATION_TIMEOUT = 30000;
+    public static final String LAT_PREFERENCES = "latPref";
+    public static final String LON_PREFERENCES = "lonPref";
 }

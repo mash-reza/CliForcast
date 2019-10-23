@@ -1,6 +1,7 @@
 package com.example.cliforcast.viewModel;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.icu.text.IDNA;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -73,7 +74,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                             com.example.cliforcast.database.Weather weather = new com.example.cliforcast.database.Weather.Builder()
                                     .id(response.body().getId())
                                     .name(response.body().getName())
-                                    .date(response.body().getDate()*1000)
+                                    .date(response.body().getDate() * 1000)
                                     .temp(response.body().getMain().getTemp())
                                     .temp_min(response.body().getMain().getTemp_min())
                                     .temp_max(response.body().getMain().getTemp_max())
@@ -122,7 +123,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                                 weathers.add(new com.example.cliforcast.database.Weather.Builder()
                                         .id(response.body().getWeather()[i * 8].getId())
                                         .name(response.body().getWeather()[i * 8].getName())
-                                        .date(response.body().getWeather()[i * 8].getDate()*1000)
+                                        .date(response.body().getWeather()[i * 8].getDate() * 1000)
                                         .temp(response.body().getWeather()[i * 8].getMain().getTemp())
                                         .temp_min(response.body().getWeather()[i * 8].getMain().getTemp_min())
                                         .temp_max(response.body().getWeather()[i * 8].getMain().getTemp_max())
@@ -174,7 +175,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                             com.example.cliforcast.database.Weather weather = new com.example.cliforcast.database.Weather.Builder()
                                     .id(response.body().getId())
                                     .name(response.body().getName())
-                                    .date(response.body().getDate()*1000)
+                                    .date(response.body().getDate() * 1000)
                                     .temp(response.body().getMain().getTemp())
                                     .temp_min(response.body().getMain().getTemp_min())
                                     .temp_max(response.body().getMain().getTemp_max())
@@ -223,7 +224,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                                 weathers.add(new com.example.cliforcast.database.Weather.Builder()
                                         .id(response.body().getWeather()[i * 8].getId())
                                         .name(response.body().getWeather()[i * 8].getName())
-                                        .date(response.body().getWeather()[i * 8].getDate()*1000)
+                                        .date(response.body().getWeather()[i * 8].getDate() * 1000)
                                         .temp(response.body().getWeather()[i * 8].getMain().getTemp())
                                         .temp_min(response.body().getWeather()[i * 8].getMain().getTemp_min())
                                         .temp_max(response.body().getWeather()[i * 8].getMain().getTemp_max())
@@ -282,37 +283,68 @@ public class CurrentWeatherViewModel extends ViewModel {
     }
 
     public void requestWeatherByLatLon() {
-//        weatherObservable.postValue(new WeatherWrapper<>(null, Error.REQUEST_NOT_COMPELLED));
-//        weatherListObservable.postValue(new WeatherWrapper<>(null, Error.REQUEST_NOT_COMPELLED));
-//        RetrofitClientInstance.getINSTANCE().getWeather(lat, lon).enqueue(new Callback<Weather>() {
-//            @Override
-//            public void onResponse(Call<Weather> call, Response<Weather> response) {
-//                if (response.body() != null) {
-//                    requestedByLocation = true;
-//                    weatherObservable.postValue(new WeatherWrapper<>(response.body(), Error.NO_ERROR));
-//
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Weather> call, Throwable t) {
-//                if (t instanceof IOException)
-//                    weatherObservable.postValue(new WeatherWrapper<>(null, Error.NO_INTERNET));
-//            }
-//        });
-//        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(lat, lon).enqueue(new Callback<WeatherList>() {
-//            @Override
-//            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
-//                if (response.body() != null)
-//                    weatherListObservable.postValue(new WeatherWrapper<>(response.body(), Error.NO_ERROR));
-//            }
-//
-//            @Override
-//            public void onFailure(Call<WeatherList> call, Throwable t) {
-//                if (t instanceof IOException)
-//                    weatherObservable.postValue(new WeatherWrapper<>(null, Error.NO_INTERNET));
-//            }
-//        });
+        weatherObservable.setValue(new WeatherWrapper<>(null, Error.REQUEST_NOT_COMPELLED));
+        weatherListObservable.setValue(new WeatherWrapper<>(null, Error.REQUEST_NOT_COMPELLED));
+        RetrofitClientInstance.getINSTANCE().getWeather(lat, lon).enqueue(new Callback<Weather>() {
+            @Override
+            public void onResponse(Call<Weather> call, Response<Weather> response) {
+                if (response.body() != null) {
+                    requestedByLocation = true;
+                    com.example.cliforcast.database.Weather weather = new com.example.cliforcast.database.Weather.Builder()
+                            .id(response.body().getId())
+                            .name(response.body().getName())
+                            .date(response.body().getDate() * 1000)
+                            .temp(response.body().getMain().getTemp())
+                            .temp_min(response.body().getMain().getTemp_min())
+                            .temp_max(response.body().getMain().getTemp_max())
+                            .pressure(response.body().getMain().getPressure())
+                            .humidity(response.body().getMain().getHumidity())
+                            .clouds(response.body().getClouds().getClouds())
+                            .day(0)
+                            .wind(response.body().getWind().getSpeed())
+                            .condition(response.body().getWeather()[0].getId())
+                            .build();
+
+                    weatherObservable.postValue(new WeatherWrapper<>(weather, Error.NO_ERROR));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Weather> call, Throwable t) {
+                if (t instanceof IOException)
+                    weatherObservable.postValue(new WeatherWrapper<>(null, Error.NO_INTERNET));
+            }
+        });
+        RetrofitClientInstance.getINSTANCE().getFiveDayWeather(lat, lon).enqueue(new Callback<WeatherList>() {
+            @Override
+            public void onResponse(Call<WeatherList> call, Response<WeatherList> response) {
+                List<com.example.cliforcast.database.Weather> weathers = new ArrayList<>(4);
+                if (response.body() != null) {
+                    for (int i = 1; i <= 4; i++) {
+                        weathers.add(new com.example.cliforcast.database.Weather.Builder()
+                                .id(response.body().getWeather()[i * 8].getId())
+                                .name(response.body().getWeather()[i * 8].getName())
+                                .date(response.body().getWeather()[i * 8].getDate() * 1000)
+                                .temp(response.body().getWeather()[i * 8].getMain().getTemp())
+                                .temp_min(response.body().getWeather()[i * 8].getMain().getTemp_min())
+                                .temp_max(response.body().getWeather()[i * 8].getMain().getTemp_max())
+                                .pressure(response.body().getWeather()[i * 8].getMain().getPressure())
+                                .humidity(response.body().getWeather()[i * 8].getMain().getHumidity())
+                                .clouds(response.body().getWeather()[i * 8].getClouds().getClouds())
+                                .day(i)
+                                .wind(response.body().getWeather()[i * 8].getWind().getSpeed())
+                                .condition(response.body().getWeather()[i * 8].getWeather()[0].getId())
+                                .build());
+                    }
+                    weatherListObservable.postValue(new WeatherWrapper<>(weathers, Error.NO_ERROR));
+                }
+            }
+            @Override
+            public void onFailure(Call<WeatherList> call, Throwable t) {
+                if (t instanceof IOException)
+                    weatherListObservable.postValue(new WeatherWrapper<>(null, Error.NO_INTERNET));
+            }
+        });
     }
 
     public void setCityId(int cityId) {

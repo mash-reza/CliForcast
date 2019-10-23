@@ -54,8 +54,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class CurrentWeather extends AppCompatActivity {
@@ -565,9 +567,24 @@ public class CurrentWeather extends AppCompatActivity {
                                 Toast.makeText(CurrentWeather.this, "null location result", Toast.LENGTH_SHORT).show();
                                 return;
                             }
-                            viewModel.setLatLon(locationResult.getLastLocation().getLatitude(),
-                                    locationResult.getLastLocation().getLongitude());
-                            viewModel.requestWeatherByLatLon();
+                            DecimalFormat df = new DecimalFormat("#.##");
+                            float lat = Float.valueOf(df.format(locationResult.getLastLocation().getLatitude()));
+                            float lon = Float.valueOf(df.format(locationResult.getLastLocation().getLongitude()));
+                            float prefLat = Float.valueOf(df.format(preferences.getFloat(Constants.LAT_PREFERENCES, -1)));
+                            float prefLon = Float.valueOf(df.format(preferences.getFloat(Constants.LON_PREFERENCES, -1)));
+                            if ((prefLat == -1 || prefLon == -1) || (prefLat != lat) || (prefLon != lon)) {
+                                viewModel.setLatLon(locationResult.getLastLocation().getLatitude(),
+                                        locationResult.getLastLocation().getLongitude());
+                                viewModel.requestWeatherByLatLon();
+                                preferences.edit()
+                                        .putFloat(Constants.LAT_PREFERENCES,(float)locationResult.getLastLocation().getLatitude())
+                                        .putFloat(Constants.LON_PREFERENCES, (float) locationResult.getLastLocation().getLongitude())
+                                        .apply();
+                            } else {
+                                viewModel.setLatLon(preferences.getFloat(Constants.LAT_PREFERENCES, -1),
+                                        preferences.getFloat(Constants.LON_PREFERENCES, -1));
+                                viewModel.requestWeatherByLatLon();
+                            }
                         }
                     }, Looper.getMainLooper());
 
@@ -584,7 +601,12 @@ public class CurrentWeather extends AppCompatActivity {
                 if (!viewModel.isRequestedByLocation()) {
                     viewModel.requestWeatherByCityID();
                 } else {
-                    viewModel.requestWeatherByLatLon();
+                    if ((preferences.getFloat(Constants.LAT_PREFERENCES, -1) != -1) &&
+                            (preferences.getFloat(Constants.LON_PREFERENCES, -1) != -1)) {
+                        viewModel.setLatLon(preferences.getFloat(Constants.LAT_PREFERENCES, -1),
+                                preferences.getFloat(Constants.LON_PREFERENCES, -1));
+                        viewModel.requestWeatherByLatLon();
+                    }
                 }
                 return true;
             default:

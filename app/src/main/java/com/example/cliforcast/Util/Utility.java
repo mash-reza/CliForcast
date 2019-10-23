@@ -1,11 +1,9 @@
 package com.example.cliforcast.Util;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.example.cliforcast.R;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -187,6 +185,10 @@ public class Utility {
     }
 
     public static boolean isWeatherExpired(long seconds) {
-        return (new Date().getTime() - (seconds)) > Constants.RELOAD_NETWORK_TIMEOUT;
+        return (new Date().getTime() - (seconds)) > Constants.REQUEST_BY_ID_TIMEOUT;
+    }
+
+    public static boolean isWeatherByLocationExpired(long seconds) {
+        return (new Date().getTime() - (seconds)) > Constants.REQUEST_BY_LOCATION_TIMEOUT;
     }
 }
