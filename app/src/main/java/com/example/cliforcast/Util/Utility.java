@@ -168,13 +168,13 @@ public class Utility {
         String language = Locale.getDefault().getLanguage();
         switch (language) {
             case Constants.ENGLISH:
-                Date englishDate = new Date(epoch * 1000);
+                Date englishDate = new Date(epoch);
 //                SimpleDateFormat format = new SimpleDateFormat("EEEE,MMMM d,yyyy h:mm,a", Locale.ENGLISH);
                 SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d", Locale.ENGLISH);
                 format.setTimeZone(TimeZone.getDefault());
                 return format.format(englishDate);
             case Constants.PERSIAN:
-                PersianDate persianDate = new PersianDate(epoch * 1000);
+                PersianDate persianDate = new PersianDate(epoch);
                 PersianDateFormat formater = new PersianDateFormat("l, j F");
                 return formater.format(persianDate);
             default:
@@ -184,5 +184,9 @@ public class Utility {
 
     public static int mphToKmh(double mph) {
         return (int) (mph * 1.609);
+    }
+
+    public static boolean isWeatherExpired(long seconds) {
+        return (new Date().getTime() - (seconds)) > Constants.RELOAD_NETWORK_TIMEOUT;
     }
 }

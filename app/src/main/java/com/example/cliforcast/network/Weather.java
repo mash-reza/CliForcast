@@ -2,12 +2,15 @@ package com.example.cliforcast.network;
 
 import com.google.gson.annotations.SerializedName;
 
+
 public class Weather {
-//    private Coord coord;
     private Weather1[] weather;
     private Main main;
     private Wind wind;
     private Clouds clouds;
+
+    public Weather(){
+    }
 
     @SerializedName("id")
     private int id;
@@ -29,10 +32,6 @@ public class Weather {
         return date;
     }
 
-//    public Coord getCoord() {
-//        return coord;
-//    }
-
     public Weather1[] getWeather() {
         return weather;
     }
@@ -50,37 +49,10 @@ public class Weather {
     }
 
 
-    public class Coord {
-        @SerializedName("lon")
-        private double lon;
-        @SerializedName("lat")
-        private double lat;
-
-        public double getLon() {
-            return lon;
-        }
-
-        public double getLat() {
-            return lat;
-        }
-    }
-
-
-    public class Weather1 {
+    public static class Weather1 {
         @SerializedName("id")
         private int id;
-        @SerializedName("main")
-        private String main;
-        @SerializedName("description")
-        private String description;
 
-        public String getMain() {
-            return main;
-        }
-
-        public String getDescription() {
-            return description;
-        }
 
         public int getId() {
             return id;
@@ -98,6 +70,7 @@ public class Weather {
         private double temp_min;
         @SerializedName("temp_max")
         private double temp_max;
+
 
         public double getTemp() {
             return temp;
@@ -120,21 +93,23 @@ public class Weather {
         }
     }
 
-    public class Wind {
+    public static class Wind {
         @SerializedName("speed")
         private double speed;
 
         public double getSpeed() {
             return speed;
         }
+
     }
 
-    public class Clouds {
+    public static class Clouds {
         @SerializedName("clouds")
         private int clouds;
 
         public int getClouds() {
             return clouds;
         }
+
     }
 }

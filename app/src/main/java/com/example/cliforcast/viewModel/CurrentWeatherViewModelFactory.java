@@ -18,6 +18,6 @@ public class CurrentWeatherViewModelFactory implements ViewModelProvider.Factory
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new CurrentWeatherViewModel(cityId));
+        return modelClass.cast(new CurrentWeatherViewModel(application.getApplicationContext(),cityId));
     }
 }

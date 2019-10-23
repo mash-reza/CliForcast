@@ -66,8 +66,8 @@ public class CurrentWeather extends AppCompatActivity {
     private boolean getLocation = false;
     private Boolean isCityResponseSuccessful = false;
     private Boolean isFiveDayResponseSuccessful = false;
-    private Weather currentWeather;
-    private WeatherList fiveDayWeather;
+    private com.example.cliforcast.database.Weather currentWeather;
+    private List<com.example.cliforcast.database.Weather> fiveDayWeather;
 
     private int cityIndexInArray;
 
@@ -161,36 +161,35 @@ public class CurrentWeather extends AppCompatActivity {
     private void observeViewModel(CurrentWeatherViewModel viewModel) {
 
         viewModel.getWeather().observe(this, weather -> {
-            if (weather.getError().equals(Error.NO_ERROR)) {
+            if (weather != null && weather.getError().equals(Error.NO_ERROR)) {
                 currentWeatherSearchRecyclerView.setVisibility(View.GONE);
                 currentWeatherErrorLinearLayout.setVisibility(View.GONE);
                 currentWeatherLoadingLinearLayout.setVisibility(View.GONE);
                 currentWeatherLayout.setVisibility(View.VISIBLE);
                 currentWeather = weather.getWeather();
-                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp()) + "°");
+                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getTemp()) + "°");
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
                     currentWeatherCityNameTextView.setText(weather.getWeather().getName());
-                currentWeatherDescriptionTextView.setText(weather.getWeather().getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                        weather.getWeather().getWeather()[0].getId()
+                        weather.getWeather().getCondition()
                 ));
                 currentWeatherDateTextView.setText(Utility.epochToDate(weather.getWeather().getDate()));
                 currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                        getApplicationContext(), weather.getWeather().getWeather()[0].getId()
+                        getApplicationContext(), weather.getWeather().getCondition()
                 ));
-                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp_max()) + "°");
-                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp_min()) + "°");
-                currentWeatherWindTextView.setText(Utility.mphToKmh(weather.getWeather().getWind().getSpeed()) + " Kmh");
-                currentWeatherCloudsTextView.setText(weather.getWeather().getClouds().getClouds() + "%");
-                currentWeatherHumidityTextView.setText(weather.getWeather().getMain().getHumidity() + "%");
+                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getTemp_max()) + "°");
+                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getTemp_min()) + "°");
+                currentWeatherWindTextView.setText(Utility.mphToKmh(weather.getWeather().getWind()) + " Kmh");
+                currentWeatherCloudsTextView.setText(weather.getWeather().getClouds() + "%");
+                currentWeatherHumidityTextView.setText(weather.getWeather().getHumidity() + "%");
                 currentWeatherNowIconImageView.setImageResource(
                         Utility.idToConditionMapper(
-                                weather.getWeather().getWeather()[0].getId()
+                                weather.getWeather().getCondition()
                         )
                 );
-                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getMain().getTemp()) + "°");
+                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(weather.getWeather().getTemp()) + "°");
             } else {
                 switch (weather.getError()) {
                     case REQUEST_NOT_COMPELLED:
@@ -226,20 +225,20 @@ public class CurrentWeather extends AppCompatActivity {
             }
         });
         viewModel.getWeatherList().observe(this, weatherList -> {
-            if (weatherList.getError().equals(Error.NO_ERROR)) {
+            if (weatherList != null && weatherList.getError().equals(Error.NO_ERROR)) {
                 fiveDayWeather = weatherList.getWeather();
-                currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[8].getMain().getTemp_max()) + "°");
-                currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[8].getMain().getTemp_min()) + "°");
-                currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[8].getWeather()[0].getId()));
-                currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[16].getMain().getTemp_max()) + "°");
-                currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[16].getMain().getTemp_min()) + "°");
-                currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[16].getWeather()[0].getId()));
-                currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[24].getMain().getTemp_max()) + "°");
-                currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[24].getMain().getTemp_min()) + "°");
-                currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[24].getWeather()[0].getId()));
-                currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[36].getMain().getTemp_max()) + "°");
-                currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().getWeather()[36].getMain().getTemp_min()) + "°");
-                currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().getWeather()[36].getWeather()[0].getId()));
+                currentWeatherFirstDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(0).getTemp_max()) + "°");
+                currentWeatherFirstDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(0).getTemp_min()) + "°");
+                currentWeatherFirstDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().get(0).getCondition()));
+                currentWeatherSecondDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(1).getTemp_max()) + "°");
+                currentWeatherSecondDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(1).getTemp_min()) + "°");
+                currentWeatherSecondDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().get(1).getCondition()));
+                currentWeatherThirdDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(2).getTemp_max()) + "°");
+                currentWeatherThirdDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(2).getTemp_min()) + "°");
+                currentWeatherThirdDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().get(2).getCondition()));
+                currentWeatherForthDayMaxTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(3).getTemp_max()) + "°");
+                currentWeatherForthDayMinTempTextView.setText(Utility.kelvinToCelsius(weatherList.getWeather().get(3).getTemp_min()) + "°");
+                currentWeatherForthDayIconImageView.setImageResource(Utility.idToConditionMapper(weatherList.getWeather().get(3).getCondition()));
             } else {
                 switch (weatherList.getError()) {
                     case REQUEST_NOT_COMPELLED:
@@ -412,122 +411,117 @@ public class CurrentWeather extends AppCompatActivity {
     private void fiveDayEventControl() {
         currentWeatherNowIconImageView.setOnClickListener(v -> {
             if (currentWeather != null) {
-                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(currentWeather.getMain().getTemp()) + "°");
+                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(currentWeather.getTemp()) + "°");
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
                     currentWeatherCityNameTextView.setText(currentWeather.getName());
-                currentWeatherDescriptionTextView.setText(currentWeather.getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                        currentWeather.getWeather()[0].getId()
+                        currentWeather.getCondition()
                 ));
                 currentWeatherDateTextView.setText(Utility.epochToDate(currentWeather.getDate()));
                 currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                        getApplicationContext(), currentWeather.getWeather()[0].getId()
+                        getApplicationContext(), currentWeather.getCondition()
                 ));
-                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(currentWeather.getMain().getTemp_max()) + "°");
-                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(currentWeather.getMain().getTemp_min()) + "°");
-                currentWeatherWindTextView.setText(Utility.mphToKmh(currentWeather.getWind().getSpeed()) + " Kmh");
-                currentWeatherCloudsTextView.setText(currentWeather.getClouds().getClouds() + "%");
-                currentWeatherHumidityTextView.setText(currentWeather.getMain().getHumidity() + "%");
+                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(currentWeather.getTemp_max()) + "°");
+                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(currentWeather.getTemp_min()) + "°");
+                currentWeatherWindTextView.setText(Utility.mphToKmh(currentWeather.getWind()) + " Kmh");
+                currentWeatherCloudsTextView.setText(currentWeather.getClouds() + "%");
+                currentWeatherHumidityTextView.setText(currentWeather.getHumidity() + "%");
                 currentWeatherNowIconImageView.setImageResource(
                         Utility.idToConditionMapper(
-                                currentWeather.getWeather()[0].getId()
+                                currentWeather.getCondition()
                         )
                 );
-                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(currentWeather.getMain().getTemp()) + "°");
+                currentWeatherNowTempTextView.setText(Utility.kelvinToCelsius(currentWeather.getTemp()) + "°");
             }
         });
         currentWeatherFirstDayIconImageView.setOnClickListener(v -> {
             if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day1, Toast.LENGTH_SHORT).show();
-                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[8].getMain().getTemp()) + "°");
+                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(0).getTemp()) + "°");
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
                     currentWeatherCityNameTextView.setText(currentWeather.getName());
-                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[8].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                        fiveDayWeather.getWeather()[8].getWeather()[0].getId()
+                        fiveDayWeather.get(0).getCondition()
                 ));
-                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.getWeather()[8].getDate()));
+                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.get(0).getDate()));
                 currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                        getApplicationContext(), fiveDayWeather.getWeather()[8].getWeather()[0].getId()
+                        getApplicationContext(), fiveDayWeather.get(1).getCondition()
                 ));
-                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[8].getMain().getTemp_max()) + "°");
-                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[8].getMain().getTemp_min()) + "°");
-                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.getWeather()[8].getWind().getSpeed()) + " Kmh");
-                currentWeatherCloudsTextView.setText(fiveDayWeather.getWeather()[8].getClouds().getClouds() + "%");
-                currentWeatherHumidityTextView.setText(fiveDayWeather.getWeather()[8].getMain().getHumidity() + "%");
+                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(0).getTemp_max()) + "°");
+                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(0).getTemp_min()) + "°");
+                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.get(0).getWind()) + " Kmh");
+                currentWeatherCloudsTextView.setText(fiveDayWeather.get(0).getClouds() + "%");
+                currentWeatherHumidityTextView.setText(fiveDayWeather.get(0).getHumidity() + "%");
             }
         });
         currentWeatherSecondDayIconImageView.setOnClickListener(v -> {
             if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day2, Toast.LENGTH_SHORT).show();
-                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[16].getMain().getTemp()) + "°");
+                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(1).getTemp()) + "°");
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
                     currentWeatherCityNameTextView.setText(currentWeather.getName());
-                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[16].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                        fiveDayWeather.getWeather()[16].getWeather()[0].getId()
+                        fiveDayWeather.get(1).getCondition()
                 ));
-                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.getWeather()[16].getDate()));
+                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.get(1).getDate()));
                 currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                        getApplicationContext(), fiveDayWeather.getWeather()[16].getWeather()[0].getId()
+                        getApplicationContext(), fiveDayWeather.get(1).getCondition()
                 ));
-                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[16].getMain().getTemp_max()) + "°");
-                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[16].getMain().getTemp_min()) + "°");
-                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.getWeather()[16].getWind().getSpeed()) + " Kmh");
-                currentWeatherCloudsTextView.setText(fiveDayWeather.getWeather()[16].getClouds().getClouds() + "%");
-                currentWeatherHumidityTextView.setText(fiveDayWeather.getWeather()[16].getMain().getHumidity() + "%");
+                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(1).getTemp_max()) + "°");
+                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(1).getTemp_min()) + "°");
+                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.get(1).getWind()) + " Kmh");
+                currentWeatherCloudsTextView.setText(fiveDayWeather.get(1).getClouds() + "%");
+                currentWeatherHumidityTextView.setText(fiveDayWeather.get(1).getHumidity() + "%");
             }
         });
         currentWeatherThirdDayIconImageView.setOnClickListener(v -> {
             if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day3, Toast.LENGTH_SHORT).show();
-                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[24].getMain().getTemp()) + "°");
+                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(2).getTemp()) + "°");
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
                     currentWeatherCityNameTextView.setText(currentWeather.getName());
-                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[24].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                        fiveDayWeather.getWeather()[24].getWeather()[0].getId()
+                        fiveDayWeather.get(2).getCondition()
                 ));
-                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.getWeather()[24].getDate()));
+                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.get(2).getDate()));
                 currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                        getApplicationContext(), fiveDayWeather.getWeather()[24].getWeather()[0].getId()
+                        getApplicationContext(), fiveDayWeather.get(2).getCondition()
                 ));
-                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[24].getMain().getTemp_max()) + "°");
-                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[24].getMain().getTemp_min()) + "°");
-                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.getWeather()[24].getWind().getSpeed()) + " Kmh");
-                currentWeatherCloudsTextView.setText(fiveDayWeather.getWeather()[24].getClouds().getClouds() + "%");
-                currentWeatherHumidityTextView.setText(fiveDayWeather.getWeather()[24].getMain().getHumidity() + "%");
+                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(2).getTemp_max()) + "°");
+                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(2).getTemp_min()) + "°");
+                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.get(2).getWind()) + " Kmh");
+                currentWeatherCloudsTextView.setText(fiveDayWeather.get(2).getClouds() + "%");
+                currentWeatherHumidityTextView.setText(fiveDayWeather.get(2).getHumidity() + "%");
             }
         });
         currentWeatherForthDayIconImageView.setOnClickListener(v -> {
             if (currentWeather != null && fiveDayWeather != null) {
                 Toast.makeText(this, R.string.day4, Toast.LENGTH_SHORT).show();
-                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[32].getMain().getTemp()) + "°");
+                currentWeatherTemperatureTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(3).getTemp()) + "°");
                 if (!viewModel.isRequestedByLocation())
                     currentWeatherCityNameTextView.setText(citiesArray[cityIndexInArray].name);
                 else
                     currentWeatherCityNameTextView.setText(currentWeather.getName());
-                currentWeatherDescriptionTextView.setText(fiveDayWeather.getWeather()[32].getWeather()[0].getMain());
                 currentWeatherStatusImageView.setImageResource(Utility.idToConditionMapper(
-                        fiveDayWeather.getWeather()[32].getWeather()[0].getId()
+                        fiveDayWeather.get(3).getCondition()
                 ));
-                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.getWeather()[32].getDate()));
+                currentWeatherDateTextView.setText(Utility.epochToDate(fiveDayWeather.get(3).getDate()));
                 currentWeatherDescriptionTextView.setText(Utility.idToStringMapper(
-                        getApplicationContext(), fiveDayWeather.getWeather()[32].getWeather()[0].getId()
+                        getApplicationContext(), fiveDayWeather.get(3).getCondition()
                 ));
-                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[32].getMain().getTemp_max()) + "°");
-                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.getWeather()[32].getMain().getTemp_min()) + "°");
-                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.getWeather()[32].getWind().getSpeed()) + " Kmh");
-                currentWeatherCloudsTextView.setText(fiveDayWeather.getWeather()[32].getClouds().getClouds() + "%");
-                currentWeatherHumidityTextView.setText(fiveDayWeather.getWeather()[32].getMain().getHumidity() + "%");
+                currentWeatherMaxTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(3).getTemp_max()) + "°");
+                currentWeatherMinTempTextView.setText(Utility.kelvinToCelsius(fiveDayWeather.get(3).getTemp_min()) + "°");
+                currentWeatherWindTextView.setText(Utility.mphToKmh(fiveDayWeather.get(3).getWind()) + " Kmh");
+                currentWeatherCloudsTextView.setText(fiveDayWeather.get(3).getClouds() + "%");
+                currentWeatherHumidityTextView.setText(fiveDayWeather.get(3).getHumidity() + "%");
             }
         });
     }
@@ -587,9 +581,9 @@ public class CurrentWeather extends AppCompatActivity {
                 else
                     locationMenuItem.setIcon(R.drawable.location_off_icon);
 
-                if(!viewModel.isRequestedByLocation()){
+                if (!viewModel.isRequestedByLocation()) {
                     viewModel.requestWeatherByCityID();
-                }else {
+                } else {
                     viewModel.requestWeatherByLatLon();
                 }
                 return true;
