@@ -65,16 +65,12 @@ public class CurrentWeather extends AppCompatActivity {
     private SharedPreferences preferences;
 
 
-    private boolean getLocation = false;
-    private Boolean isCityResponseSuccessful = false;
-    private Boolean isFiveDayResponseSuccessful = false;
     private com.example.cliforcast.database.Weather currentWeather;
     private List<com.example.cliforcast.database.Weather> fiveDayWeather;
 
     private int cityIndexInArray;
 
     //GoogleApiClient client;
-    private FusedLocationProviderClient fusedLocationProviderClient;
     LocationManager locationManager;
 
     InputStream in;
@@ -121,7 +117,6 @@ public class CurrentWeather extends AppCompatActivity {
     Menu menu;
 
 
-    LiveData<Weather> weatherLiveData;
     CurrentWeatherViewModel viewModel;
 
     @Override
@@ -144,12 +139,10 @@ public class CurrentWeather extends AppCompatActivity {
         citiesArray = new Gson().fromJson(reader, City[].class);
         setIndexInArray(preferences.getInt(Constants.CITYID, 0));
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermission();
 
         fillCitiesList();
         initUi();
-        //getCityForcast();
         if (preferences.getBoolean(Constants.FIRST_LAUNCH_PREFERENCES, true)) {
             currentWeatherLayout.setVisibility(View.GONE);
             showChooseCityDialog();
@@ -554,43 +547,7 @@ public class CurrentWeather extends AppCompatActivity {
                 onSearchRequested();
                 return true;
             case R.id.currentWeatherLocationMenuItem:
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    LocationRequest request = new LocationRequest();
-                    request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                    request.setInterval(1800000);
-                    //request.setFastestInterval(5000);
-                    fusedLocationProviderClient.requestLocationUpdates(request, new LocationCallback() {
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
-                            super.onLocationResult(locationResult);
-                            if (locationResult == null) {
-                                Toast.makeText(CurrentWeather.this, "null location result", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                            DecimalFormat df = new DecimalFormat("#.##");
-                            float lat = Float.valueOf(df.format(locationResult.getLastLocation().getLatitude()));
-                            float lon = Float.valueOf(df.format(locationResult.getLastLocation().getLongitude()));
-                            float prefLat = Float.valueOf(df.format(preferences.getFloat(Constants.LAT_PREFERENCES, -1)));
-                            float prefLon = Float.valueOf(df.format(preferences.getFloat(Constants.LON_PREFERENCES, -1)));
-                            if ((prefLat == -1 || prefLon == -1) || (prefLat != lat) || (prefLon != lon)) {
-                                viewModel.setLatLon(locationResult.getLastLocation().getLatitude(),
-                                        locationResult.getLastLocation().getLongitude());
-                                viewModel.requestWeatherByLatLon();
-                                preferences.edit()
-                                        .putFloat(Constants.LAT_PREFERENCES,(float)locationResult.getLastLocation().getLatitude())
-                                        .putFloat(Constants.LON_PREFERENCES, (float) locationResult.getLastLocation().getLongitude())
-                                        .apply();
-                            } else {
-                                viewModel.setLatLon(preferences.getFloat(Constants.LAT_PREFERENCES, -1),
-                                        preferences.getFloat(Constants.LON_PREFERENCES, -1));
-                                viewModel.requestWeatherByLatLon();
-                            }
-                        }
-                    }, Looper.getMainLooper());
-
-                } else
-                    Toast.makeText(this, R.string.turn_on_location, Toast.LENGTH_LONG).show();
-                return true;
+                viewModel.requestWeatherByLatLon();
             case R.id.currentWeatherRefreshMenuItem:
                 MenuItem locationMenuItem = this.menu.findItem(R.id.currentWeatherLocationMenuItem);
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
@@ -601,12 +558,7 @@ public class CurrentWeather extends AppCompatActivity {
                 if (!viewModel.isRequestedByLocation()) {
                     viewModel.requestWeatherByCityID();
                 } else {
-                    if ((preferences.getFloat(Constants.LAT_PREFERENCES, -1) != -1) &&
-                            (preferences.getFloat(Constants.LON_PREFERENCES, -1) != -1)) {
-                        viewModel.setLatLon(preferences.getFloat(Constants.LAT_PREFERENCES, -1),
-                                preferences.getFloat(Constants.LON_PREFERENCES, -1));
-                        viewModel.requestWeatherByLatLon();
-                    }
+                    viewModel.requestWeatherByLatLon();
                 }
                 return true;
             default:

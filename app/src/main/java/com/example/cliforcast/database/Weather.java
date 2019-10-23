@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-@Entity(tableName = "cities", primaryKeys = {"id","day"})
+@Entity(tableName = "cities", primaryKeys = {"id", "day"})
 public class Weather {
     @ColumnInfo(name = "id")
     private int id;
@@ -36,6 +36,10 @@ public class Weather {
     private int clouds;
     @ColumnInfo(name = "day")
     private int day;
+    @ColumnInfo(name = "lat")
+    private double lat;
+    @ColumnInfo(name = "lon")
+    private double lon;
 
     public Weather() {
     }
@@ -44,96 +48,112 @@ public class Weather {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public long getDate() {
-        return date;
-    }
-
-    public int getCondition() {
-        return condition;
-    }
-
-    public double getTemp() {
-        return temp;
-    }
-
-    public float getPressure() {
-        return pressure;
-    }
-
-    public int getHumidity() {
-        return humidity;
-    }
-
-    public double getTemp_min() {
-        return temp_min;
-    }
-
-    public double getTemp_max() {
-        return temp_max;
-    }
-
-    public double getWind() {
-        return wind;
-    }
-
-    public int getClouds() {
-        return clouds;
-    }
-
-    public int getDay() {
-        return day;
-    }
-
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
+    public long getDate() {
+        return date;
+    }
+
     public void setDate(long date) {
         this.date = date;
+    }
+
+    public int getCondition() {
+        return condition;
     }
 
     public void setCondition(int condition) {
         this.condition = condition;
     }
 
+    public double getTemp() {
+        return temp;
+    }
+
     public void setTemp(double temp) {
         this.temp = temp;
+    }
+
+    public float getPressure() {
+        return pressure;
     }
 
     public void setPressure(float pressure) {
         this.pressure = pressure;
     }
 
+    public int getHumidity() {
+        return humidity;
+    }
+
     public void setHumidity(int humidity) {
         this.humidity = humidity;
+    }
+
+    public double getTemp_min() {
+        return temp_min;
     }
 
     public void setTemp_min(double temp_min) {
         this.temp_min = temp_min;
     }
 
+    public double getTemp_max() {
+        return temp_max;
+    }
+
     public void setTemp_max(double temp_max) {
         this.temp_max = temp_max;
+    }
+
+    public double getWind() {
+        return wind;
     }
 
     public void setWind(double wind) {
         this.wind = wind;
     }
 
+    public int getClouds() {
+        return clouds;
+    }
+
     public void setClouds(int clouds) {
         this.clouds = clouds;
     }
 
+    public int getDay() {
+        return day;
+    }
+
     public void setDay(int day) {
         this.day = day;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
     }
 
     public Weather(Builder builder) {
@@ -149,6 +169,8 @@ public class Weather {
         this.wind = builder.wind;
         this.clouds = builder.clouds;
         this.day = builder.day;
+        this.lat = builder.lat;
+        this.lon = builder.lon;
     }
 
     public static class Builder {
@@ -164,6 +186,8 @@ public class Weather {
         private double wind;
         private int clouds;
         private int day;
+        private double lat;
+        private double lon;
 
         public Builder id(int id) {
             this.id = id;
@@ -222,6 +246,16 @@ public class Weather {
 
         public Builder day(int day) {
             this.day = day;
+            return this;
+        }
+
+        public Builder lat(double lat) {
+            this.lat = lat;
+            return this;
+        }
+
+        public Builder lon(double lon) {
+            this.lon = lon;
             return this;
         }
 

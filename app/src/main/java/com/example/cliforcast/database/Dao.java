@@ -13,7 +13,10 @@ public interface Dao {
     void insertCity(Weather weather);
 
     @Query("select * from cities where id = :id and day = :day")
-    Weather getCity(int id,int day);
+    Weather getCityById(int id, int day);
+
+    @Query("select * from cities where lat = :lat and lon = :lon")
+    Weather getCityByCoord(double lat,double lon);
 
     @Query("select * from cities")
     List<Weather> getAllCities();
