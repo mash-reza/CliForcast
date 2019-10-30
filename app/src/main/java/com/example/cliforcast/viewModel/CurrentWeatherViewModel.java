@@ -86,6 +86,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                                     .id(response.body().getId())
                                     .name(response.body().getName())
                                     .date(response.body().getDate() * 1000)
+                                    .compare_date(date)
                                     .temp(response.body().getMain().getTemp())
                                     .temp_min(response.body().getMain().getTemp_min())
                                     .temp_max(response.body().getMain().getTemp_max())
@@ -99,21 +100,7 @@ public class CurrentWeatherViewModel extends ViewModel {
 
                             weatherObservable.postValue(new WeatherWrapper<>(weather, Error.NO_ERROR));
                             AsyncTask.execute(() -> {
-                                com.example.cliforcast.database.Weather databaseWeather = new com.example.cliforcast.database.Weather.Builder()
-                                        .id(response.body().getId())
-                                        .name(response.body().getName())
-                                        .date(date)
-                                        .temp(response.body().getMain().getTemp())
-                                        .temp_min(response.body().getMain().getTemp_min())
-                                        .temp_max(response.body().getMain().getTemp_max())
-                                        .pressure(response.body().getMain().getPressure())
-                                        .humidity(response.body().getMain().getHumidity())
-                                        .clouds(response.body().getClouds().getClouds())
-                                        .day(0)
-                                        .wind(response.body().getWind().getSpeed())
-                                        .condition(response.body().getWeather()[0].getId())
-                                        .build();
-                                RoomHelper.getInstance(context).getDao().insertCity(databaseWeather);
+                                RoomHelper.getInstance(context).getDao().insertCity(weather);
                             });
                             Log.i(TAG, "onResponse: from network city");
                         }
@@ -135,6 +122,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                                         .id(response.body().getWeather()[i * 8].getId())
                                         .name(response.body().getWeather()[i * 8].getName())
                                         .date(response.body().getWeather()[i * 8].getDate() * 1000)
+                                        .compare_date(date)
                                         .temp(response.body().getWeather()[i * 8].getMain().getTemp())
                                         .temp_min(response.body().getWeather()[i * 8].getMain().getTemp_min())
                                         .temp_max(response.body().getWeather()[i * 8].getMain().getTemp_max())
@@ -153,7 +141,8 @@ public class CurrentWeatherViewModel extends ViewModel {
                                             new com.example.cliforcast.database.Weather.Builder()
                                                     .id(cityId)
                                                     .name(response.body().getWeather()[i * 8].getName())
-                                                    .date(date)
+                                                    .date(response.body().getWeather()[i * 8].getDate() * 1000)
+                                                    .compare_date(date)
                                                     .temp(response.body().getWeather()[i * 8].getMain().getTemp())
                                                     .temp_min(response.body().getWeather()[i * 8].getMain().getTemp_min())
                                                     .temp_max(response.body().getWeather()[i * 8].getMain().getTemp_max())
@@ -177,7 +166,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                             weatherListObservable.postValue(new WeatherWrapper<>(null, Error.NO_INTERNET));
                     }
                 });
-            } else if (Utility.isWeatherExpired(databaseWeather.getDate())) {
+            } else if (Utility.isWeatherExpired(databaseWeather.getCompare_date())) {
                 RetrofitClientInstance.getINSTANCE().getWeather(cityId).enqueue(new Callback<Weather>() {
                     @Override
                     public void onResponse(Call<Weather> call, Response<Weather> response) {
@@ -187,6 +176,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                                     .id(response.body().getId())
                                     .name(response.body().getName())
                                     .date(response.body().getDate() * 1000)
+                                    .compare_date(date)
                                     .temp(response.body().getMain().getTemp())
                                     .temp_min(response.body().getMain().getTemp_min())
                                     .temp_max(response.body().getMain().getTemp_max())
@@ -203,7 +193,8 @@ public class CurrentWeatherViewModel extends ViewModel {
                                 com.example.cliforcast.database.Weather databaseWeather = new com.example.cliforcast.database.Weather.Builder()
                                         .id(response.body().getId())
                                         .name(response.body().getName())
-                                        .date(date)
+                                        .date(response.body().getDate() * 1000)
+                                        .compare_date(date)
                                         .temp(response.body().getMain().getTemp())
                                         .temp_min(response.body().getMain().getTemp_min())
                                         .temp_max(response.body().getMain().getTemp_max())
@@ -236,6 +227,7 @@ public class CurrentWeatherViewModel extends ViewModel {
                                         .id(response.body().getWeather()[i * 8].getId())
                                         .name(response.body().getWeather()[i * 8].getName())
                                         .date(response.body().getWeather()[i * 8].getDate() * 1000)
+                                        .compare_date(date)
                                         .temp(response.body().getWeather()[i * 8].getMain().getTemp())
                                         .temp_min(response.body().getWeather()[i * 8].getMain().getTemp_min())
                                         .temp_max(response.body().getWeather()[i * 8].getMain().getTemp_max())
@@ -254,7 +246,8 @@ public class CurrentWeatherViewModel extends ViewModel {
                                             new com.example.cliforcast.database.Weather.Builder()
                                                     .id(cityId)
                                                     .name(response.body().getWeather()[i * 8].getName())
-                                                    .date(date)
+                                                    .date(response.body().getWeather()[i * 8].getDate() * 1000)
+                                                    .compare_date(date)
                                                     .temp(response.body().getWeather()[i * 8].getMain().getTemp())
                                                     .temp_min(response.body().getWeather()[i * 8].getMain().getTemp_min())
                                                     .temp_max(response.body().getWeather()[i * 8].getMain().getTemp_max())
@@ -436,7 +429,8 @@ public class CurrentWeatherViewModel extends ViewModel {
                                             weatherListObservable.postValue(new WeatherWrapper<>(null, Error.NO_INTERNET));
                                     }
                                 });
-                            } else if (Utility.isWeatherByLocationExpired(databaseWeather.getDate())) {
+                            } else
+                                if (Utility.isWeatherByLocationExpired(databaseWeather.getDate())) {
                                 RetrofitClientInstance.getINSTANCE().getWeather(
                                         locationResult.getLastLocation().getLatitude(),
                                         locationResult.getLastLocation().getLongitude()
@@ -553,7 +547,8 @@ public class CurrentWeatherViewModel extends ViewModel {
                                     .putFloat(Constants.LAT_PREFERENCES, (float) locationResult.getLastLocation().getLatitude())
                                     .putFloat(Constants.LON_PREFERENCES, (float) locationResult.getLastLocation().getLongitude())
                                     .apply();
-                        } else if ((prefLat == -1 || prefLon == -1) || (prefLat != lat) || (prefLon != lon)) {
+                        } else
+                            if ((prefLat == -1 || prefLon == -1) || (prefLat != lat) || (prefLon != lon)) {
                             //post database weather to livedata
                             RetrofitClientInstance.getINSTANCE().getWeather(
                                     locationResult.getLastLocation().getLatitude(),
@@ -668,7 +663,8 @@ public class CurrentWeatherViewModel extends ViewModel {
                                         weatherListObservable.postValue(new WeatherWrapper<>(null, Error.NO_INTERNET));
                                 }
                             });
-                        } else if (Utility.isWeatherByLocationExpired(databaseWeather.getDate())) {
+                        } else
+                            if (Utility.isWeatherByLocationExpired(databaseWeather.getDate())) {
                             RetrofitClientInstance.getINSTANCE().getWeather(
                                     locationResult.getLastLocation().getLatitude(),
                                     locationResult.getLastLocation().getLongitude()
@@ -871,10 +867,6 @@ public class CurrentWeatherViewModel extends ViewModel {
         this.cityId = cityId;
     }
 
-    public void setLatLon(double lat, double lon) {
-        this.lat = lat;
-        this.lon = lon;
-    }
 
     public boolean isRequestedByLocation() {
         return requestedByLocation;

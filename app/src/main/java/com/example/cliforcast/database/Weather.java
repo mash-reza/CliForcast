@@ -18,6 +18,8 @@ public class Weather {
     private String name;
     @ColumnInfo(name = "dt")
     private long date;
+    @ColumnInfo(name = "compare_date")
+    private long compare_date;
     @ColumnInfo(name = "condition")
     private int condition;
     @ColumnInfo(name = "temp")
@@ -156,10 +158,19 @@ public class Weather {
         this.lon = lon;
     }
 
+    public long getCompare_date() {
+        return compare_date;
+    }
+
+    public void setCompare_date(long compare_date) {
+        this.compare_date = compare_date;
+    }
+
     public Weather(Builder builder) {
         this.id = builder.id;
         this.name = builder.name;
         this.date = builder.date;
+        this.compare_date = builder.compare_date;
         this.condition = builder.condition;
         this.temp = builder.temp;
         this.pressure = builder.pressure;
@@ -177,6 +188,7 @@ public class Weather {
         private int id;
         private String name;
         private long date;
+        private long compare_date;
         private int condition;
         private double temp;
         private float pressure;
@@ -201,6 +213,11 @@ public class Weather {
 
         public Builder date(long date) {
             this.date = date;
+            return this;
+        }
+
+        public Builder compare_date(long compare_date) {
+            this.compare_date = compare_date;
             return this;
         }
 
